@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "DEV (local)",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": [
+        "--dart-define=API_BASE_URL=http://192.168.1.11:3099",
+        "--dart-define=KEYCLOAK_TOKEN_URL=http://192.168.1.11:8181/realms/field-management-backend/protocol/openid-connect/token",
+        "--dart-define=KEYCLOAK_CLIENT_ID=field-management-api"
+      ]
+    }
+  ]
+}
