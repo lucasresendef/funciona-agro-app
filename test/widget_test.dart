@@ -1,5 +1,4 @@
 import 'package:field_management_app/features/auth/presentation/pages/auth_pages.dart';
-import 'package:field_management_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +20,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('settings page renders sections and supports scroll', (
+  testWidgets('profile page renders empty state and stays stable', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(360, 640);
@@ -29,13 +28,14 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SettingsPage())),
+      const ProviderScope(
+        child: MaterialApp(home: Scaffold(body: ProfilePage())),
+      ),
     );
 
-    expect(find.text('Cadastros'), findsOneWidget);
-
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
     await tester.pumpAndSettle();
+
+    expect(find.text('Sem perfil carregado'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
