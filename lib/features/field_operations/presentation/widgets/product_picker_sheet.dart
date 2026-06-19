@@ -67,11 +67,23 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
         return;
       }
       final availableProducts = result.data
-          .where(
-            (product) =>
-                (widget.availableByProduct[product.metadata.id] ?? 0) > 0,
-          )
-          .toList();
+          .toList()
+        ..sort((a, b) {
+          final aAvailable = widget.availableByProduct[a.metadata.id] ?? 0;
+          final bAvailable = widget.availableByProduct[b.metadata.id] ?? 0;
+          final aHasStock = aAvailable > 0;
+          final bHasStock = bAvailable > 0;
+          if (aHasStock == bHasStock) {
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          }
+          return aHasStock ? -1 : 1;
+        });
+      debugPrint(
+        '[ProductPickerSheet._loadFirstPage] search="${_search.trim()}" '
+        'apiItems=${result.data.length} '
+        'shownItems=${availableProducts.length} '
+        'availableMapSize=${widget.availableByProduct.length}',
+      );
       setState(() {
         _products = availableProducts;
         _page = result.page;
@@ -108,11 +120,23 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
         return;
       }
       final availableProducts = result.data
-          .where(
-            (product) =>
-                (widget.availableByProduct[product.metadata.id] ?? 0) > 0,
-          )
-          .toList();
+          .toList()
+        ..sort((a, b) {
+          final aAvailable = widget.availableByProduct[a.metadata.id] ?? 0;
+          final bAvailable = widget.availableByProduct[b.metadata.id] ?? 0;
+          final aHasStock = aAvailable > 0;
+          final bHasStock = bAvailable > 0;
+          if (aHasStock == bHasStock) {
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          }
+          return aHasStock ? -1 : 1;
+        });
+      debugPrint(
+        '[ProductPickerSheet._loadMore] search="${_search.trim()}" '
+        'apiItems=${result.data.length} '
+        'shownItems=${availableProducts.length} '
+        'availableMapSize=${widget.availableByProduct.length}',
+      );
       setState(() {
         _products = [..._products, ...availableProducts];
         _page = result.page;
@@ -162,9 +186,8 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
                   ? const LoadingStateView(message: 'Carregando produtos...')
                   : _products.isEmpty
                   ? const EmptyStateView(
-                      title: 'Nenhum produto disponível',
-                      message:
-                          'Não há produtos com saldo disponível neste local de estoque.',
+                      title: 'Nenhum produto encontrado',
+                      message: 'Não há produtos cadastrados para este filtro.',
                     )
                   : InfiniteScrollListView<Product>(
                       items: _products,
@@ -176,19 +199,30 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
                       itemBuilder: (context, product, _) {
                         final available =
                             widget.availableByProduct[product.metadata.id] ?? 0;
+                        final hasStock = available > 0;
                         final isSelected =
                             widget.selectedProductId == product.metadata.id;
 
                         return AppCard(
                           child: ListTile(
-                            onTap: () => Navigator.of(context).pop(product),
+                            enabled: hasStock,
+                            onTap: hasStock
+                                ? () => Navigator.of(context).pop(product)
+                                : null,
                             title: Text(product.name),
                             subtitle: Text(
-                              'Saldo disponível: ${available.toStringAsFixed(2)}',
+                              hasStock
+                                  ? 'Saldo disponível: ${available.toStringAsFixed(2)}'
+                                  : 'Saldo zerado neste local de estoque',
                             ),
                             trailing: isSelected
                                 ? const Icon(Icons.check_circle_outline_rounded)
-                                : const Icon(Icons.chevron_right_rounded),
+                                : hasStock
+                                ? const Icon(Icons.chevron_right_rounded)
+                                : const Icon(
+                                    Icons.info_outline_rounded,
+                                    color: Colors.orange,
+                                  ),
                           ),
                         );
                       },

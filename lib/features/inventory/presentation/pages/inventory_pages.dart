@@ -1,9 +1,11 @@
+import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/storage/session_manager.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
 import 'package:field_management_app/core/utils/formatters.dart';
 import 'package:field_management_app/core/utils/validators.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_destructive.dart';
+import 'package:field_management_app/design_system/components/app_detail_dialog.dart';
 import 'package:field_management_app/design_system/components/app_dropdown_field.dart';
 import 'package:field_management_app/design_system/components/app_form_sheet.dart';
 import 'package:field_management_app/design_system/components/app_field_loading.dart';
@@ -12,7 +14,6 @@ import 'package:field_management_app/design_system/components/app_search_bar.dar
 import 'package:field_management_app/design_system/components/app_text_field.dart';
 import 'package:field_management_app/design_system/components/async_state_views.dart';
 import 'package:field_management_app/design_system/components/infinite_scroll_list_view.dart';
-import 'package:field_management_app/design_system/foundations/app_layout.dart';
 import 'package:field_management_app/design_system/foundations/app_spacing.dart';
 import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
 import 'package:field_management_app/features/inventory/domain/entities/inventory_models.dart';
@@ -32,18 +33,18 @@ class InventoryLocationsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locationsAsync = ref.watch(inventoryLocationsInfiniteListProvider);
-    final farmsAsync = ref.watch(allActiveFarmsProvider);
     final filter = ref.watch(inventoryLocationsFilterProvider);
-    final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
+    final isAdmin = ref.watch(isAdminProvider);
 
     return AppPage(
       title: 'Locais de estoque',
       actions: [
-        IconButton.filled(
-          tooltip: 'Novo local',
-          onPressed: () => _showCreateInventoryLocationDialog(context),
-          icon: const Icon(Icons.add_rounded),
-        ),
+        if (isAdmin)
+          IconButton.filled(
+            tooltip: 'Novo local',
+            onPressed: () => _showCreateInventoryLocationDialog(context),
+            icon: const Icon(Icons.add_rounded),
+          ),
       ],
       child: Column(
         children: [
@@ -55,35 +56,6 @@ class InventoryLocationsPage extends ConsumerWidget {
                   .copyWith(search: value);
             },
             trailing: [
-              SizedBox(
-                width: AppLayout.formFieldWidth(context, 260),
-                child: farmsAsync.maybeWhen(
-                  data: (farms) => DropdownButtonFormField<String?>(
-                    value: filter.farmId ?? selectedFarmId,
-                    decoration: const InputDecoration(labelText: 'Fazenda'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Todas'),
-                      ),
-                      ...farms.map(
-                        (farm) => DropdownMenuItem<String?>(
-                          value: farm.metadata.id,
-                          child: Text(farm.name),
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      ref
-                          .read(inventoryLocationsFilterProvider.notifier)
-                          .state = filter.copyWith(
-                        farmId: value,
-                      );
-                    },
-                  ),
-                  orElse: SizedBox.shrink,
-                ),
-              ),
               FilterChip(
                 label: const Text('Somente ativos'),
                 selected: filter.active ?? false,
@@ -120,6 +92,7 @@ class InventoryLocationsPage extends ConsumerWidget {
                   itemBuilder: (context, location, _) {
                     return _InventoryLocationTile(
                       location: location,
+                      canManage: isAdmin,
                       onEdit: () =>
                           _showEditInventoryLocationDialog(context, location),
                       onDelete: () => _confirmDeleteInventoryLocation(
@@ -197,11 +170,13 @@ class InventoryLocationsPage extends ConsumerWidget {
 class _InventoryLocationTile extends StatelessWidget {
   const _InventoryLocationTile({
     required this.location,
+    required this.canManage,
     required this.onEdit,
     required this.onDelete,
   });
 
   final InventoryLocation location;
+  final bool canManage;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -212,6 +187,7 @@ class _InventoryLocationTile extends StatelessWidget {
         onTap: () => _showInventoryLocationDetailsSheet(
           context,
           location,
+          canManage,
           onEdit,
           onDelete,
         ),
@@ -236,77 +212,17 @@ class _InventoryLocationTile extends StatelessWidget {
 void _showInventoryLocationDetailsSheet(
   BuildContext context,
   InventoryLocation location,
+  bool canManage,
   VoidCallback onEdit,
   VoidCallback onDelete,
 ) {
-  showModalBottomSheet<void>(
+  showAppDetailDialog<void>(
     context: context,
-    showDragHandle: true,
-    useSafeArea: true,
-    builder: (context) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.sm,
-          AppSpacing.md,
-          AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              location.name,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                Chip(
-                  label: Text(location.metadata.active ? 'Ativo' : 'Inativo'),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(location.description ?? 'Sem descrição'),
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onEdit();
-                    },
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Editar'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onDelete();
-                    },
-                    style: AppDestructive.outlinedStyle(context),
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: AppDestructive.iconColor(context),
-                    ),
-                    label: const Text('Excluir'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
+    title: location.name,
+    canManage: canManage,
+    onEdit: onEdit,
+    onDelete: onDelete,
+    content: Text(location.description ?? 'Sem descrição'),
   );
 }
 
@@ -527,12 +443,17 @@ class InventoryBalancePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final balancesAsync = ref.watch(inventoryBalancesInfiniteListProvider);
-    final farmsAsync = ref.watch(allActiveFarmsProvider);
     final productsAsync = ref.watch(allActiveProductsProvider);
     final filter = ref.watch(inventoryBalanceFilterProvider);
     final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
+    final productNameById = productsAsync.maybeWhen(
+      data: (products) => <String, String>{
+        for (final product in products) product.metadata.id: product.name,
+      },
+      orElse: () => const <String, String>{},
+    );
     final locationsAsync = ref.watch(
-      inventoryLocationsByFarmProvider(filter.farmId ?? selectedFarmId),
+      inventoryLocationsByFarmProvider(selectedFarmId),
     );
 
     return AppPage(
@@ -550,15 +471,9 @@ class InventoryBalancePage extends ConsumerWidget {
       child: Column(
         children: [
           InventoryBalanceFiltersBar(
-            farmsAsync: farmsAsync,
             locationsAsync: locationsAsync,
             productsAsync: productsAsync,
             filter: filter,
-            selectedFarmId: selectedFarmId,
-            onFarmChanged: (value) {
-              ref.read(inventoryBalanceFilterProvider.notifier).state = filter
-                  .copyWith(farmId: value, inventoryLocationId: null);
-            },
             onLocationChanged: (value) {
               ref.read(inventoryBalanceFilterProvider.notifier).state = filter
                   .copyWith(inventoryLocationId: value);
@@ -592,8 +507,10 @@ class InventoryBalancePage extends ConsumerWidget {
                       .loadMore(),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, balance, _) =>
-                      _InventoryBalanceTile(balance: balance),
+                  itemBuilder: (context, balance, _) => _InventoryBalanceTile(
+                    balance: balance,
+                    productName: productNameById[balance.productId],
+                  ),
                 );
               },
               loading: () => const LoadingStateView(),
@@ -611,9 +528,10 @@ class InventoryBalancePage extends ConsumerWidget {
 }
 
 class _InventoryBalanceTile extends StatelessWidget {
-  const _InventoryBalanceTile({required this.balance});
+  const _InventoryBalanceTile({required this.balance, this.productName});
 
   final InventoryBalance balance;
+  final String? productName;
 
   @override
   Widget build(BuildContext context) {
@@ -623,7 +541,11 @@ class _InventoryBalanceTile extends StatelessWidget {
         leading: const CircleAvatar(
           child: Icon(Icons.pie_chart_outline_rounded),
         ),
-        title: Text('Produto ${balance.productId}'),
+        title: Text(
+          productName?.trim().isNotEmpty == true
+              ? productName!
+              : 'Produto ${balance.productId}',
+        ),
         subtitle: Text(
           'Quantidade: ${AppFormatters.number(balance.quantity)} | Custo médio: ${AppFormatters.currency(balance.averageUnitCost)}',
         ),

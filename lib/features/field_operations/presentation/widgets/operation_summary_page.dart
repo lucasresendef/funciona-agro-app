@@ -5,17 +5,25 @@ import 'package:field_management_app/design_system/foundations/app_spacing.dart'
 import 'package:field_management_app/features/field_operations/domain/entities/field_operation_models.dart';
 import 'package:field_management_app/features/fields/presentation/controllers/fields_controller.dart';
 import 'package:field_management_app/features/products/presentation/controllers/products_controller.dart';
+import 'package:field_management_app/features/units/presentation/controllers/units_controller.dart';
 import 'package:field_management_app/shared/models/app_enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OperationSummaryPage extends ConsumerWidget {
+class OperationSummaryPage extends ConsumerStatefulWidget {
   const OperationSummaryPage({required this.operation, super.key});
 
   final FieldOperation operation;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OperationSummaryPage> createState() =>
+      _OperationSummaryPageState();
+}
+
+class _OperationSummaryPageState extends ConsumerState<OperationSummaryPage> {
+  @override
+  Widget build(BuildContext context) {
+    final operation = widget.operation;
     final productsAsync = ref.watch(allActiveProductsProvider);
     final productNames = productsAsync.maybeWhen(
       data: (products) => <String, String>{
@@ -23,13 +31,49 @@ class OperationSummaryPage extends ConsumerWidget {
       },
       orElse: () => const <String, String>{},
     );
+    final productUnitIdByProductId = productsAsync.maybeWhen(
+      data: (products) => <String, String>{
+        for (final product in products)
+          product.metadata.id: product.unitOfMeasureId,
+      },
+      orElse: () => const <String, String>{},
+    );
+    final unitsAsync = ref.watch(allActiveUnitsProvider);
+    final unitSymbolByUnitId = unitsAsync.maybeWhen(
+      data: (units) => <String, String>{
+        for (final unit in units) unit.metadata.id: unit.symbol,
+      },
+      orElse: () => const <String, String>{},
+    );
     final fieldsAsync = ref.watch(fieldsByFarmProvider(operation.farmId));
-    final fieldName = fieldsAsync.maybeWhen(
-      data: (fields) => fields
-          .where((field) => field.metadata.id == operation.fieldId)
-          .map((field) => field.name)
-          .firstOrNull,
-      orElse: () => null,
+    final fieldNameById = fieldsAsync.maybeWhen(
+      data: (fields) => <String, String>{
+        for (final field in fields) field.metadata.id: field.name,
+      },
+      orElse: () => const <String, String>{},
+    );
+    final fieldAreaById = fieldsAsync.maybeWhen(
+      data: (fields) => <String, double>{
+        for (final field in fields) field.metadata.id: field.areaHectares,
+      },
+      orElse: () => const <String, double>{},
+    );
+    final operationFieldIds = operation.fieldIds.isNotEmpty
+        ? operation.fieldIds
+        : operation.fields.map((field) => field.fieldId).toList();
+    final operationFieldNamesWithArea = operationFieldIds
+        .map((fieldId) {
+          final name = fieldNameById[fieldId] ?? fieldId;
+          final area = fieldAreaById[fieldId];
+          if (area == null) {
+            return '$name (área n/d)';
+          }
+          return '$name (${AppFormatters.number(area)} ha)';
+        })
+        .join(', ');
+    final totalAreaHectares = operationFieldIds.fold<double>(
+      0,
+      (sum, fieldId) => sum + (fieldAreaById[fieldId] ?? 0),
     );
     final totalSent = operation.items.fold<double>(
       0,
@@ -43,6 +87,11 @@ class OperationSummaryPage extends ConsumerWidget {
       0,
       (sum, item) => sum + (item.quantityConsumed ?? item.quantitySent),
     );
+    final consumedUnitLabel = _resolveConsumedUnitLabel(
+      operation: operation,
+      productUnitIdByProductId: productUnitIdByProductId,
+      unitSymbolByUnitId: unitSymbolByUnitId,
+    );
     final totalCost = operation.items.fold<double>(
       0,
       (sum, item) =>
@@ -55,6 +104,13 @@ class OperationSummaryPage extends ConsumerWidget {
 
     return AppPage(
       title: 'Resumo da operação',
+      actions: [
+        IconButton(
+          tooltip: 'Ver histórico',
+          onPressed: () => _openHistorySheet(context, operation),
+          icon: const Icon(Icons.history_rounded),
+        ),
+      ],
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,16 +128,20 @@ class OperationSummaryPage extends ConsumerWidget {
                     children: [
                       Chip(label: Text(operation.status.label)),
                       Chip(
-                        label: Text(
-                          'Operação ${operation.metadata.id.substring(0, 8)}',
-                        ),
+                        label: Text(_operationLabel(operation.sequenceNumber)),
                       ),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),
                   _SummaryRow(
-                    label: 'Talhão',
-                    value: fieldName ?? operation.fieldId,
+                    label: 'Talhões',
+                    value: operationFieldNamesWithArea,
+                  ),
+                  _SummaryRow(
+                    label: 'Área total',
+                    value: totalAreaHectares <= 0
+                        ? 'Não disponível'
+                        : '${AppFormatters.number(totalAreaHectares)} ha',
                   ),
                   _SummaryRow(
                     label: 'Data da operação',
@@ -127,21 +187,22 @@ class OperationSummaryPage extends ConsumerWidget {
                         width: itemWidth,
                         child: _MetricChip(
                           title: 'Enviado',
-                          value: totalSent.toStringAsFixed(2),
+                          value: AppFormatters.number(totalSent),
                         ),
                       ),
                       SizedBox(
                         width: itemWidth,
                         child: _MetricChip(
                           title: 'Devolvido',
-                          value: totalReturned.toStringAsFixed(2),
+                          value: AppFormatters.number(totalReturned),
                         ),
                       ),
                       SizedBox(
                         width: itemWidth,
                         child: _MetricChip(
                           title: 'Consumido',
-                          value: totalConsumed.toStringAsFixed(2),
+                          value:
+                              '${AppFormatters.number(totalConsumed)} $consumedUnitLabel',
                         ),
                       ),
                       SizedBox(
@@ -162,9 +223,16 @@ class OperationSummaryPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Itens e movimentações',
+                    'Consumo por produto e talhão',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Leitura detalhada por produto com distribuição por talhão.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -172,7 +240,11 @@ class OperationSummaryPage extends ConsumerWidget {
                     final index = entry.key;
                     final item = entry.value;
                     final consumed = item.quantityConsumed ?? item.quantitySent;
-                    final returned = item.quantityReturned ?? 0;
+                    final unitSymbol = _resolveUnitSymbol(
+                      productId: item.productId,
+                      productUnitIdByProductId: productUnitIdByProductId,
+                      unitSymbolByUnitId: unitSymbolByUnitId,
+                    );
                     final lineTotal =
                         (item.totalCostConsumed ?? consumed) *
                         item.unitCostAtOperation;
@@ -182,96 +254,18 @@ class OperationSummaryPage extends ConsumerWidget {
                             ? 0
                             : AppSpacing.sm,
                       ),
-                      child: AppCard(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.35),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              productNames[item.productId] ?? item.productId,
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Wrap(
-                              spacing: AppSpacing.sm,
-                              runSpacing: AppSpacing.xs,
-                              children: [
-                                Chip(
-                                  label: Text(
-                                    'Enviado: ${item.quantitySent.toStringAsFixed(2)}',
-                                  ),
-                                ),
-                                Chip(
-                                  label: Text(
-                                    'Devolvido: ${returned.toStringAsFixed(2)}',
-                                  ),
-                                ),
-                                Chip(
-                                  label: Text(
-                                    'Consumido: ${consumed.toStringAsFixed(2)}',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              'Custo unitário: ${AppFormatters.currency(item.unitCostAtOperation)}',
-                            ),
-                            Text(
-                              'Custo total do item: ${AppFormatters.currency(lineTotal)}',
-                            ),
-                            if (item.notes != null &&
-                                item.notes!.isNotEmpty) ...[
-                              const SizedBox(height: AppSpacing.xs),
-                              Text('Observação: ${item.notes!}'),
-                            ],
-                          ],
-                        ),
+                      child: _ConsumptionProductCard(
+                        productName:
+                            productNames[item.productId] ?? item.productId,
+                        unitSymbol: unitSymbol,
+                        consumed: consumed,
+                        lineTotal: lineTotal,
+                        fieldResults: item.fieldResults,
+                        fieldNameById: fieldNameById,
+                        notes: item.notes,
                       ),
                     );
                   }),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Histórico da ação',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  _HistoryEventTile(
-                    icon: Icons.add_task_rounded,
-                    title: 'Operação criada',
-                    actor: operation.metadata.createdBy ?? '-',
-                    actorEmail: operation.metadata.createdByEmail,
-                    date: operation.metadata.createdAt,
-                  ),
-                  _HistoryEventTile(
-                    icon: Icons.rule_folder_outlined,
-                    title: operation.status == FieldOperationStatus.finished
-                        ? 'Operação finalizada'
-                        : 'Última atualização',
-                    actor:
-                        operation.metadata.updatedBy ??
-                        operation.metadata.createdBy ??
-                        '-',
-                    actorEmail:
-                        operation.metadata.updatedByEmail ??
-                        operation.metadata.createdByEmail,
-                    date:
-                        operation.metadata.updatedAt ??
-                        operation.metadata.createdAt,
-                  ),
                 ],
               ),
             ),
@@ -280,6 +274,106 @@ class OperationSummaryPage extends ConsumerWidget {
       ),
     );
   }
+
+  void _openHistorySheet(BuildContext context, FieldOperation operation) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetContext) {
+        final mediaQuery = MediaQuery.of(sheetContext);
+        final maxHeight = mediaQuery.size.height * 0.72;
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.xs,
+              AppSpacing.md,
+              AppSpacing.md,
+            ),
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Text(
+                  'Histórico da ação',
+                  style: Theme.of(
+                    sheetContext,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                _HistoryEventTile(
+                  icon: Icons.add_task_rounded,
+                  title: 'Operação criada',
+                  actor: operation.metadata.createdBy ?? '-',
+                  actorEmail: operation.metadata.createdByEmail,
+                  date: operation.metadata.createdAt,
+                ),
+                _HistoryEventTile(
+                  icon: Icons.rule_folder_outlined,
+                  title: operation.status == FieldOperationStatus.finished
+                      ? 'Operação finalizada'
+                      : 'Última atualização',
+                  actor:
+                      operation.metadata.updatedBy ??
+                      operation.metadata.createdBy ??
+                      '-',
+                  actorEmail:
+                      operation.metadata.updatedByEmail ??
+                      operation.metadata.createdByEmail,
+                  date:
+                      operation.metadata.updatedAt ??
+                      operation.metadata.createdAt,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+String _operationLabel(int? sequenceNumber) {
+  if (sequenceNumber == null) {
+    return 'Operação';
+  }
+  return 'Operação #$sequenceNumber';
+}
+
+String _resolveUnitSymbol({
+  required String productId,
+  required Map<String, String> productUnitIdByProductId,
+  required Map<String, String> unitSymbolByUnitId,
+}) {
+  final unitId = productUnitIdByProductId[productId];
+  return unitId == null ? 'un.' : (unitSymbolByUnitId[unitId] ?? 'un.');
+}
+
+String _resolveConsumedUnitLabel({
+  required FieldOperation operation,
+  required Map<String, String> productUnitIdByProductId,
+  required Map<String, String> unitSymbolByUnitId,
+}) {
+  final symbols = operation.items
+      .map(
+        (item) => _resolveUnitSymbol(
+          productId: item.productId,
+          productUnitIdByProductId: productUnitIdByProductId,
+          unitSymbolByUnitId: unitSymbolByUnitId,
+        ),
+      )
+      .toSet();
+
+  if (symbols.isEmpty) {
+    return 'un.';
+  }
+  if (symbols.length == 1) {
+    return symbols.first;
+  }
+  return '(unidades mistas)';
 }
 
 class _SummaryRow extends StatelessWidget {
@@ -292,19 +386,54 @@ class _SummaryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 130,
-            child: Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ),
-          Expanded(child: Text(value)),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 520;
+          if (compact) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 130,
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  value,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -334,12 +463,189 @@ class _MetricChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: Theme.of(context).textTheme.labelMedium),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
             Text(
               value,
               style: Theme.of(
                 context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ConsumptionProductCard extends StatelessWidget {
+  const _ConsumptionProductCard({
+    required this.productName,
+    required this.unitSymbol,
+    required this.consumed,
+    required this.lineTotal,
+    required this.fieldResults,
+    required this.fieldNameById,
+    required this.notes,
+  });
+
+  final String productName;
+  final String unitSymbol;
+  final double consumed;
+  final double lineTotal;
+  final List<FieldOperationItemFieldResult> fieldResults;
+  final Map<String, String> fieldNameById;
+  final String? notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalAllocated = fieldResults.fold<double>(
+      0,
+      (sum, item) => sum + (item.allocatedQuantityConsumed ?? 0),
+    );
+
+    return AppCard(
+      color: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            productName,
+            style: Theme.of(
+              context,
+            ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final compact = constraints.maxWidth < 540;
+              final cardWidth = compact
+                  ? constraints.maxWidth
+                  : (constraints.maxWidth - AppSpacing.sm) / 2;
+              return Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  SizedBox(
+                    width: cardWidth,
+                    child: _InlineMetric(
+                      label: 'Consumido total',
+                      value: '${AppFormatters.number(consumed)} $unitSymbol',
+                    ),
+                  ),
+                  SizedBox(
+                    width: cardWidth,
+                    child: _InlineMetric(
+                      label: 'Custo total do item',
+                      value: AppFormatters.currency(lineTotal),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Distribuição por talhão',
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          if (fieldResults.isEmpty)
+            Text(
+              'Sem distribuição por talhão.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ...fieldResults.map((result) {
+            final allocatedQuantity = result.allocatedQuantityConsumed ?? 0;
+            final fieldName =
+                result.fieldName ??
+                fieldNameById[result.fieldId] ??
+                result.fieldId;
+            final percentage = totalAllocated <= 0
+                ? null
+                : (allocatedQuantity / totalAllocated) * 100;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      fieldName,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: Text(
+                      percentage == null
+                          ? '${AppFormatters.number(allocatedQuantity)} $unitSymbol'
+                          : '${AppFormatters.number(allocatedQuantity)} $unitSymbol (${AppFormatters.number(percentage)}%)',
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (notes != null && notes!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            _InlineMetric(label: 'Observação', value: notes!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineMetric extends StatelessWidget {
+  const _InlineMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.75),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
           ],
         ),
@@ -365,38 +671,14 @@ class _HistoryEventTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(radius: 18, child: Icon(icon, size: 18)),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: AppCard(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text('Responsável: $actor'),
-                  if (actorEmail != null && actorEmail!.isNotEmpty)
-                    Text('Email: $actorEmail'),
-                  Text(
-                    'Data: ${date == null ? '-' : AppFormatters.dateTime(date)}',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(
+        '${AppFormatters.dateTime(date)}\n$actor${actorEmail == null ? '' : ' • $actorEmail'}',
       ),
+      isThreeLine: true,
     );
   }
 }

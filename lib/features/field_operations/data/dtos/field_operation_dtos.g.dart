@@ -6,45 +6,57 @@ part of 'field_operation_dtos.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_FieldOperationDto _$FieldOperationDtoFromJson(Map<String, dynamic> json) =>
-    _FieldOperationDto(
-      id: json['id'] as String,
-      active: json['active'] as bool,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
-      createdBy: json['createdBy'] as String?,
-      createdByEmail: json['createdByEmail'] as String?,
-      updatedBy: json['updatedBy'] as String?,
-      updatedByEmail: json['updatedByEmail'] as String?,
-      farmId: json['farmId'] as String,
-      fieldId: json['fieldId'] as String,
-      operationDate: DateTime.parse(json['operationDate'] as String),
-      status: $enumDecode(_$FieldOperationStatusEnumMap, json['status']),
-      description: json['description'] as String?,
-      responsibleUserId: json['responsibleUserId'] as String?,
-      startedAt: json['startedAt'] == null
-          ? null
-          : DateTime.parse(json['startedAt'] as String),
-      finishedAt: json['finishedAt'] == null
-          ? null
-          : DateTime.parse(json['finishedAt'] as String),
-      items:
-          (json['items'] as List<dynamic>?)
-              ?.map(
-                (e) =>
-                    FieldOperationItemDto.fromJson(e as Map<String, dynamic>),
-              )
-              .toList() ??
-          const <FieldOperationItemDto>[],
-    );
+_FieldOperationDto _$FieldOperationDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationDto(
+  id: json['id'] as String,
+  sequenceNumber: (json['sequenceNumber'] as num?)?.toInt(),
+  active: json['active'] as bool,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
+  createdBy: json['createdBy'] as String?,
+  createdByEmail: json['createdByEmail'] as String?,
+  updatedBy: json['updatedBy'] as String?,
+  updatedByEmail: json['updatedByEmail'] as String?,
+  farmId: json['farmId'] as String,
+  fieldIds:
+      (json['fieldIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const <String>[],
+  fields:
+      (json['fields'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                FieldOperationFieldRefDto.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const <FieldOperationFieldRefDto>[],
+  operationDate: DateTime.parse(json['operationDate'] as String),
+  status: $enumDecode(_$FieldOperationStatusEnumMap, json['status']),
+  description: json['description'] as String?,
+  responsibleUserId: json['responsibleUserId'] as String?,
+  startedAt: json['startedAt'] == null
+      ? null
+      : DateTime.parse(json['startedAt'] as String),
+  finishedAt: json['finishedAt'] == null
+      ? null
+      : DateTime.parse(json['finishedAt'] as String),
+  items:
+      (json['items'] as List<dynamic>?)
+          ?.map(
+            (e) => FieldOperationItemDto.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const <FieldOperationItemDto>[],
+);
 
 Map<String, dynamic> _$FieldOperationDtoToJson(_FieldOperationDto instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'sequenceNumber': instance.sequenceNumber,
       'active': instance.active,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
@@ -53,7 +65,8 @@ Map<String, dynamic> _$FieldOperationDtoToJson(_FieldOperationDto instance) =>
       'updatedBy': instance.updatedBy,
       'updatedByEmail': instance.updatedByEmail,
       'farmId': instance.farmId,
-      'fieldId': instance.fieldId,
+      'fieldIds': instance.fieldIds,
+      'fields': instance.fields,
       'operationDate': instance.operationDate.toIso8601String(),
       'status': _$FieldOperationStatusEnumMap[instance.status]!,
       'description': instance.description,
@@ -67,6 +80,22 @@ const _$FieldOperationStatusEnumMap = {
   FieldOperationStatus.open: 'OPEN',
   FieldOperationStatus.finished: 'FINISHED',
   FieldOperationStatus.canceled: 'CANCELED',
+};
+
+_FieldOperationFieldRefDto _$FieldOperationFieldRefDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationFieldRefDto(
+  fieldId: json['fieldId'] as String,
+  name: json['name'] as String?,
+  areaHectares: const OptionalDoubleConverter().fromJson(json['areaHectares']),
+);
+
+Map<String, dynamic> _$FieldOperationFieldRefDtoToJson(
+  _FieldOperationFieldRefDto instance,
+) => <String, dynamic>{
+  'fieldId': instance.fieldId,
+  'name': instance.name,
+  'areaHectares': const OptionalDoubleConverter().toJson(instance.areaHectares),
 };
 
 _FieldOperationItemDto _$FieldOperationItemDtoFromJson(
@@ -100,6 +129,15 @@ _FieldOperationItemDto _$FieldOperationItemDtoFromJson(
     json['totalCostConsumed'],
   ),
   notes: json['notes'] as String?,
+  fieldResults:
+      (json['fieldResults'] as List<dynamic>?)
+          ?.map(
+            (e) => FieldOperationItemFieldResultDto.fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      const <FieldOperationItemFieldResultDto>[],
 );
 
 Map<String, dynamic> _$FieldOperationItemDtoToJson(
@@ -129,13 +167,42 @@ Map<String, dynamic> _$FieldOperationItemDtoToJson(
     instance.totalCostConsumed,
   ),
   'notes': instance.notes,
+  'fieldResults': instance.fieldResults,
+};
+
+_FieldOperationItemFieldResultDto _$FieldOperationItemFieldResultDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationItemFieldResultDto(
+  fieldId: json['fieldId'] as String,
+  fieldName: json['fieldName'] as String?,
+  allocatedQuantityConsumed: const OptionalDoubleConverter().fromJson(
+    json['allocatedQuantityConsumed'],
+  ),
+  allocatedCostConsumed: const OptionalDoubleConverter().fromJson(
+    json['allocatedCostConsumed'],
+  ),
+);
+
+Map<String, dynamic> _$FieldOperationItemFieldResultDtoToJson(
+  _FieldOperationItemFieldResultDto instance,
+) => <String, dynamic>{
+  'fieldId': instance.fieldId,
+  'fieldName': instance.fieldName,
+  'allocatedQuantityConsumed': const OptionalDoubleConverter().toJson(
+    instance.allocatedQuantityConsumed,
+  ),
+  'allocatedCostConsumed': const OptionalDoubleConverter().toJson(
+    instance.allocatedCostConsumed,
+  ),
 };
 
 _CreateFieldOperationRequestDto _$CreateFieldOperationRequestDtoFromJson(
   Map<String, dynamic> json,
 ) => _CreateFieldOperationRequestDto(
   farmId: json['farmId'] as String,
-  fieldId: json['fieldId'] as String,
+  fieldIds:
+      (json['fieldIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const <String>[],
   operationDate: DateTime.parse(json['operationDate'] as String),
   status:
       $enumDecodeNullable(_$FieldOperationStatusEnumMap, json['status']) ??
@@ -164,7 +231,7 @@ Map<String, dynamic> _$CreateFieldOperationRequestDtoToJson(
   _CreateFieldOperationRequestDto instance,
 ) => <String, dynamic>{
   'farmId': instance.farmId,
-  'fieldId': instance.fieldId,
+  'fieldIds': instance.fieldIds,
   'operationDate': instance.operationDate.toIso8601String(),
   'status': _$FieldOperationStatusEnumMap[instance.status]!,
   'description': instance.description,

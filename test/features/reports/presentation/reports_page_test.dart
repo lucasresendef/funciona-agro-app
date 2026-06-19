@@ -1,6 +1,8 @@
 import 'package:field_management_app/core/models/audit_metadata.dart';
 import 'package:field_management_app/features/farms/domain/entities/farm.dart';
 import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
+import 'package:field_management_app/features/fields/domain/entities/field.dart';
+import 'package:field_management_app/features/fields/presentation/controllers/fields_controller.dart';
 import 'package:field_management_app/features/reports/domain/entities/reports_models.dart';
 import 'package:field_management_app/features/reports/domain/repositories/reports_repository.dart';
 import 'package:field_management_app/features/reports/domain/usecases/reports_usecases.dart';
@@ -11,6 +13,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _NoopRepository implements ReportsRepository {
+  @override
+  Future<DashboardMetrics> getDashboardMetrics(
+    GetDashboardMetricsInput input,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<FieldConsumptionReport> getFieldConsumptionReport({
+    required String fieldId,
+    required DateTime from,
+    required DateTime to,
+  }) {
+    throw UnimplementedError();
+  }
+
   @override
   Future<ReportJobCreated> createInventoryMovementsCsvJob(
     CreateInventoryMovementsCsvJobInput input,
@@ -47,7 +65,7 @@ class _FakeReportCsvController extends ReportCsvController {
 }
 
 void main() {
-  testWidgets('fluxo feliz básico exibe ações após gerar CSV', (tester) async {
+  testWidgets('renderiza filtros e ações de relatório', (tester) async {
     final farm = Farm(
       metadata: const AuditMetadata(id: 'farm-1', active: true),
       name: 'Fazenda Teste',
@@ -57,6 +75,7 @@ void main() {
       ProviderScope(
         overrides: [
           allActiveFarmsProvider.overrideWith((ref) async => [farm]),
+          fieldsByFarmProvider('farm-1').overrideWith((ref) async => <Field>[]),
           reportCsvControllerProvider.overrideWith(
             (ref) => _FakeReportCsvController(),
           ),
@@ -67,16 +86,8 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(DropdownButtonFormField<String>).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Fazenda Teste').last);
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Gerar CSV'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('CSV gerado e salvo com sucesso.'), findsOneWidget);
-    expect(find.text('Compartilhar'), findsOneWidget);
-    expect(find.text('Abrir'), findsOneWidget);
+    expect(find.text('Exportar CSV'), findsOneWidget);
+    expect(find.text('Consumo por talhão'), findsOneWidget);
+    expect(find.text('Consultar consumo'), findsOneWidget);
   });
 }

@@ -4,6 +4,7 @@ import 'package:field_management_app/features/reports/domain/entities/reports_mo
 import 'package:field_management_app/features/reports/domain/usecases/reports_usecases.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
 
 enum ReportFlowStatus { idle, creating, processing, completed, failed }
@@ -49,6 +50,45 @@ class ReportCsvState {
     );
   }
 }
+
+class FieldConsumptionReportFilter {
+  const FieldConsumptionReportFilter({
+    required this.fieldId,
+    required this.from,
+    required this.to,
+  });
+
+  final String fieldId;
+  final DateTime from;
+  final DateTime to;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is FieldConsumptionReportFilter &&
+        other.fieldId == fieldId &&
+        other.from == from &&
+        other.to == to;
+  }
+
+  @override
+  int get hashCode => Object.hash(fieldId, from, to);
+}
+
+final fieldConsumptionReportProvider = FutureProvider.autoDispose
+    .family<FieldConsumptionReport, FieldConsumptionReportFilter>((
+      ref,
+      filter,
+    ) {
+      final useCases = ReportsUseCases(ref.read(reportsRepositoryProvider));
+      return useCases.getFieldConsumptionReport(
+        fieldId: filter.fieldId,
+        from: filter.from,
+        to: filter.to,
+      );
+    });
 
 final reportCsvControllerProvider =
     StateNotifierProvider.autoDispose<ReportCsvController, ReportCsvState>((

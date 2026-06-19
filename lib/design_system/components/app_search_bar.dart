@@ -105,44 +105,62 @@ class _AppSearchBarState extends State<AppSearchBar> {
       ),
     );
 
-    return AppCard(
-      padding: EdgeInsets.all(isCompact ? AppSpacing.sm : AppSpacing.md),
-      child: Column(
-        children: [
-          if (isCompact)
-            Row(
-              children: [
-                Expanded(child: searchField),
-                if (normalizedTrailing.isNotEmpty) ...[
-                  const SizedBox(width: AppSpacing.xs),
-                  IconButton.filledTonal(
-                    tooltip: 'Filtros',
-                    onPressed: () =>
-                        _openFiltersSheet(context, normalizedTrailing),
-                    icon: const Icon(Icons.tune_rounded),
-                  ),
-                ],
-              ],
-            )
-          else ...[
-            searchField,
+    if (isCompact) {
+      return AppCard(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Row(
+          children: [
+            Expanded(child: searchField),
             if (normalizedTrailing.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: normalizedTrailing
-                    .map(
-                      (child) => ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: AppLayout.formFieldWidth(context, 320),
-                        ),
-                        child: child,
-                      ),
-                    )
-                    .toList(),
+              const SizedBox(width: AppSpacing.xs),
+              IconButton.filledTonal(
+                tooltip: 'Filtros',
+                onPressed: () => _openFiltersSheet(context, normalizedTrailing),
+                icon: const Icon(Icons.tune_rounded),
               ),
             ],
+          ],
+        ),
+      );
+    }
+
+    if (normalizedTrailing.length == 1) {
+      return AppCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Expanded(child: searchField),
+            const SizedBox(width: AppSpacing.md),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 260),
+              child: normalizedTrailing.first,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        children: [
+          searchField,
+          if (normalizedTrailing.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: normalizedTrailing
+                  .map(
+                    (child) => ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: AppLayout.formFieldWidth(context, 320),
+                      ),
+                      child: child,
+                    ),
+                  )
+                  .toList(),
+            ),
           ],
         ],
       ),

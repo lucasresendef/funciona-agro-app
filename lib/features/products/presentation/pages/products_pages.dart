@@ -1,3 +1,4 @@
+import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
 import 'package:field_management_app/core/utils/validators.dart';
 import 'package:field_management_app/design_system/components/app_action_button.dart';
@@ -32,15 +33,17 @@ class ProductsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(productsInfiniteListProvider);
     final filter = ref.watch(productsFilterProvider);
+    final isAdmin = ref.watch(isAdminProvider);
 
     return AppPage(
       title: 'Produtos',
       actions: [
-        IconButton.filled(
-          tooltip: 'Novo produto',
-          onPressed: () => _showCreateProductDialog(context),
-          icon: const Icon(Icons.add_rounded),
-        ),
+        if (isAdmin)
+          IconButton.filled(
+            tooltip: 'Novo produto',
+            onPressed: () => _showCreateProductDialog(context),
+            icon: const Icon(Icons.add_rounded),
+          ),
       ],
       child: Column(
         children: [
@@ -104,6 +107,7 @@ class ProductsPage extends ConsumerWidget {
                   itemBuilder: (context, product, _) {
                     return ProductListTile(
                       product: product,
+                      canManage: isAdmin,
                       onEdit: () => _showEditProductDialog(context, product),
                       onDelete: () =>
                           _confirmDeleteProduct(context, ref, product),

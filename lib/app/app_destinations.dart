@@ -14,19 +14,19 @@ class AppDestination {
 
 const appDestinations = <AppDestination>[
   AppDestination(
+    label: 'Operações',
+    route: '/field-operations',
+    icon: Icons.precision_manufacturing_outlined,
+  ),
+  AppDestination(
+    label: 'Relatórios',
+    route: '/reports/operations',
+    icon: Icons.summarize_outlined,
+  ),
+  AppDestination(
     label: 'Dashboard',
     route: '/dashboard',
     icon: Icons.dashboard_outlined,
-  ),
-  AppDestination(
-    label: 'Configurações',
-    route: '/settings',
-    icon: Icons.tune_rounded,
-  ),
-  AppDestination(
-    label: 'Perfil',
-    route: '/profile',
-    icon: Icons.account_circle_outlined,
   ),
   AppDestination(
     label: 'Fazendas',
@@ -57,26 +57,5 @@ const appDestinations = <AppDestination>[
     label: 'Saldos de Estoque',
     route: '/inventory/balance',
     icon: Icons.pie_chart_outline_rounded,
-  ),
-  AppDestination(
-    label: 'Operações',
-    route: '/field-operations',
-    icon: Icons.precision_manufacturing_outlined,
-  ),
-
-  AppDestination(
-    label: 'Relatórios',
-    route: '/reports/operations',
-    icon: Icons.summarize_outlined,
-  ),
-  AppDestination(
-    label: 'Usuários',
-    route: '/users',
-    icon: Icons.group_outlined,
-  ),
-  AppDestination(
-    label: 'Permissões',
-    route: '/permissions',
-    icon: Icons.verified_user_outlined,
   ),
 ];

@@ -13,6 +13,11 @@ class ReportsRepositoryImpl implements ReportsRepository {
   final ReportsRemoteDataSource _remoteDataSource;
 
   @override
+  Future<DashboardMetrics> getDashboardMetrics(GetDashboardMetricsInput input) {
+    return _remoteDataSource.getDashboardMetrics(input);
+  }
+
+  @override
   Future<ReportJobCreated> createInventoryMovementsCsvJob(
     CreateInventoryMovementsCsvJobInput input,
   ) => _remoteDataSource.createInventoryMovementsCsvJob(input);
@@ -24,4 +29,15 @@ class ReportsRepositoryImpl implements ReportsRepository {
   @override
   Future<ReportJob> getReportJob(String jobId) =>
       _remoteDataSource.getReportJob(jobId);
+
+  @override
+  Future<FieldConsumptionReport> getFieldConsumptionReport({
+    required String fieldId,
+    required DateTime from,
+    required DateTime to,
+  }) => _remoteDataSource.getFieldConsumptionReport(
+    fieldId: fieldId,
+    from: from,
+    to: to,
+  );
 }

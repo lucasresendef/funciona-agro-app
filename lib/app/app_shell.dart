@@ -3,12 +3,11 @@ import 'package:field_management_app/core/config/app_environment.dart';
 import 'package:field_management_app/core/storage/session_manager.dart';
 import 'package:field_management_app/core/theme/app_theme.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
+import 'package:field_management_app/design_system/components/app_confirm_dialog.dart';
 import 'package:field_management_app/design_system/foundations/app_spacing.dart';
 import 'package:field_management_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:field_management_app/features/field_operations/presentation/pages/field_operations_pages.dart';
 import 'package:field_management_app/features/products/presentation/pages/products_pages.dart';
-import 'package:field_management_app/features/reports/presentation/pages/reports_pages.dart';
-import 'package:field_management_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:field_management_app/shared/widgets/farm_context_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -105,14 +104,7 @@ class AppShell extends ConsumerWidget {
                 const Expanded(child: FarmContextSelector(compact: true)),
               ],
             ),
-            actions: [
-              IconButton(
-                tooltip: 'Mais opções',
-                onPressed: () => _openMobileShortcuts(context),
-                icon: const Icon(Icons.grid_view_rounded),
-              ),
-              const _SessionMenu(),
-            ],
+            actions: const [_SessionMenu()],
           ),
           body: SafeArea(
             top: false,
@@ -122,7 +114,7 @@ class AppShell extends ConsumerWidget {
             selectedSection: selectedSection,
             onProductsTap: () => context.go(ProductsPage.routePath),
             onOperationsTap: () => context.go(FieldOperationsPage.routePath),
-            onSettingsTap: () => context.go(SettingsPage.routePath),
+            onMenuTap: () => _openMobileShortcuts(context),
           ),
         );
       },
@@ -139,29 +131,21 @@ void _openMobileShortcuts(BuildContext context) {
       return ListView(
         shrinkWrap: true,
         children: [
+          for (final destination in appDestinations)
+            ListTile(
+              leading: Icon(destination.icon),
+              title: Text(destination.label),
+              onTap: () {
+                Navigator.of(context).pop();
+                context.go(destination.route);
+              },
+            ),
           ListTile(
-            leading: const Icon(Icons.summarize_outlined),
-            title: const Text('Relatórios'),
-            subtitle: const Text('Gerar e baixar CSV de operações'),
+            leading: const Icon(Icons.account_circle_outlined),
+            title: const Text('Perfil'),
             onTap: () {
               Navigator.of(context).pop();
-              context.go(OperationsReportPage.routePath);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.agriculture_outlined),
-            title: const Text('Fazendas'),
-            onTap: () {
-              Navigator.of(context).pop();
-              context.go('/farms');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.grid_view_rounded),
-            title: const Text('Talhões'),
-            onTap: () {
-              Navigator.of(context).pop();
-              context.go('/fields');
+              context.go('/profile');
             },
           ),
         ],
@@ -343,39 +327,51 @@ class _Sidebar extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         AppCard(
-          child: Row(
-            children: [
-              CircleAvatar(
-                child: Text(
-                  userName.isEmpty
-                      ? 'U'
-                      : userName.characters.first.toUpperCase(),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      userName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
+          padding: EdgeInsets.zero,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+            onTap: () => context.go('/profile'),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    child: Text(
+                      userName.isEmpty
+                          ? 'U'
+                          : userName.characters.first.toUpperCase(),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      userEmail,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          userEmail,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(Icons.chevron_right_rounded),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ],
@@ -383,7 +379,7 @@ class _Sidebar extends StatelessWidget {
   }
 }
 
-enum _MobileSection { products, operations, settings }
+enum _MobileSection { products, operations, menu }
 
 _MobileSection _mobileSectionForLocation(String location) {
   if (location.startsWith(ProductsPage.routePath)) {
@@ -392,7 +388,7 @@ _MobileSection _mobileSectionForLocation(String location) {
   if (location.startsWith(FieldOperationsPage.routePath)) {
     return _MobileSection.operations;
   }
-  return _MobileSection.settings;
+  return _MobileSection.menu;
 }
 
 class _MobileBottomBar extends StatelessWidget {
@@ -400,13 +396,13 @@ class _MobileBottomBar extends StatelessWidget {
     required this.selectedSection,
     required this.onProductsTap,
     required this.onOperationsTap,
-    required this.onSettingsTap,
+    required this.onMenuTap,
   });
 
   final _MobileSection selectedSection;
   final VoidCallback onProductsTap;
   final VoidCallback onOperationsTap;
-  final VoidCallback onSettingsTap;
+  final VoidCallback onMenuTap;
 
   @override
   Widget build(BuildContext context) {
@@ -444,10 +440,10 @@ class _MobileBottomBar extends StatelessWidget {
               ),
               Expanded(
                 child: _BottomBarButton(
-                  icon: Icons.tune_rounded,
-                  label: 'Config.',
-                  selected: selectedSection == _MobileSection.settings,
-                  onTap: onSettingsTap,
+                  icon: Icons.grid_view_rounded,
+                  label: 'Menu',
+                  selected: selectedSection == _MobileSection.menu,
+                  onTap: onMenuTap,
                 ),
               ),
             ],
@@ -524,21 +520,21 @@ class _SessionMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<String>(
-      tooltip: 'Sessão',
-      icon: const Icon(Icons.account_circle_outlined),
-      onSelected: (value) async {
-        if (value == 'profile') {
-          context.go('/profile');
+    return IconButton(
+      tooltip: 'Sair',
+      icon: const Icon(Icons.logout_rounded),
+      onPressed: () async {
+        final shouldLogout = await showAppConfirmationDialog(
+          context,
+          title: 'Sair da conta',
+          message: 'Tem certeza que deseja sair do app?',
+          confirmLabel: 'Sair',
+        );
+        if (!shouldLogout) {
           return;
         }
-
         await ref.read(authControllerProvider.notifier).logout();
       },
-      itemBuilder: (context) => const [
-        PopupMenuItem<String>(value: 'profile', child: Text('Perfil')),
-        PopupMenuItem<String>(value: 'logout', child: Text('Sair')),
-      ],
     );
   }
 }

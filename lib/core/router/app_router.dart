@@ -6,17 +6,14 @@ import 'package:field_management_app/features/farms/presentation/pages/farms_pag
 import 'package:field_management_app/features/field_operations/presentation/pages/field_operations_pages.dart';
 import 'package:field_management_app/features/fields/presentation/pages/fields_pages.dart';
 import 'package:field_management_app/features/inventory/presentation/pages/inventory_pages.dart';
-import 'package:field_management_app/features/permissions/presentation/pages/permissions_pages.dart';
 import 'package:field_management_app/features/products/presentation/pages/products_pages.dart';
 import 'package:field_management_app/features/reports/presentation/pages/reports_pages.dart';
-import 'package:field_management_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:field_management_app/features/units/presentation/pages/units_pages.dart';
-import 'package:field_management_app/features/users/presentation/pages/users_pages.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final sessionManager = ref.watch(sessionManagerProvider);
+  final sessionManager = ref.read(sessionManagerProvider);
 
   return GoRouter(
     initialLocation: SplashPage.routePath,
@@ -34,9 +31,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return location == LoginPage.routePath ? null : LoginPage.routePath;
       }
 
-      if (location == SplashPage.routePath ||
-          location == LoginPage.routePath ||
-          location == '/') {
+      if (location == SplashPage.routePath || location == LoginPage.routePath) {
         return FieldOperationsPage.routePath;
       }
 
@@ -57,10 +52,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: DashboardPage.routePath,
             builder: (_, __) => const DashboardPage(),
-          ),
-          GoRoute(
-            path: SettingsPage.routePath,
-            builder: (_, __) => const SettingsPage(),
           ),
           GoRoute(
             path: ProfilePage.routePath,
@@ -126,22 +117,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: CreateFieldOperationPage.routePath,
             builder: (_, __) => const CreateFieldOperationPage(),
-          ),
-          GoRoute(
-            path: UsersPage.routePath,
-            builder: (_, __) => const UsersPage(),
-          ),
-          GoRoute(
-            path: CreateUserPage.routePath,
-            builder: (_, __) => const CreateUserPage(),
-          ),
-          GoRoute(
-            path: PermissionsPage.routePath,
-            builder: (_, __) => const PermissionsPage(),
-          ),
-          GoRoute(
-            path: CreatePermissionPage.routePath,
-            builder: (_, __) => const CreatePermissionPage(),
           ),
         ],
       ),

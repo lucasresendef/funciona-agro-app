@@ -48,6 +48,7 @@ class AuthRemoteDataSource {
         data: {
           'client_id': AppEnvironment.keycloakClientId,
           'grant_type': 'password',
+          'username': credentials.username,
           'password': credentials.password,
           'scope': 'openid profile email',
         },
@@ -63,10 +64,7 @@ class AuthRemoteDataSource {
       final payload = response.data ?? <String, dynamic>{};
       final dto = AuthTokenResponseDto.fromJson(payload);
       final idToken = payload['id_token'] as String?;
-      final identityToken = idToken?.isNotEmpty == true
-          ? idToken!
-          : dto.accessToken;
-      final jwtPayload = decodeJwtPayload(identityToken) ?? <String, dynamic>{};
+      final jwtPayload = decodeJwtPayload(dto.accessToken) ?? <String, dynamic>{};
 
       appDebugLog(
         'AuthRemoteDataSource',

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FieldOperationDto {
 
- String get id; bool get active; DateTime? get createdAt; DateTime? get updatedAt; String? get createdBy; String? get createdByEmail; String? get updatedBy; String? get updatedByEmail; String get farmId; String get fieldId; DateTime get operationDate; FieldOperationStatus get status; String? get description; String? get responsibleUserId; DateTime? get startedAt; DateTime? get finishedAt; List<FieldOperationItemDto> get items;
+ String get id; int? get sequenceNumber; bool get active; DateTime? get createdAt; DateTime? get updatedAt; String? get createdBy; String? get createdByEmail; String? get updatedBy; String? get updatedByEmail; String get farmId; List<String> get fieldIds; List<FieldOperationFieldRefDto> get fields; DateTime get operationDate; FieldOperationStatus get status; String? get description; String? get responsibleUserId; DateTime? get startedAt; DateTime? get finishedAt; List<FieldOperationItemDto> get items;
 /// Create a copy of FieldOperationDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FieldOperationDtoCopyWith<FieldOperationDto> get copyWith => _$FieldOperationDt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldOperationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&const DeepCollectionEquality().equals(other.items, items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldOperationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.sequenceNumber, sequenceNumber) || other.sequenceNumber == sequenceNumber)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&const DeepCollectionEquality().equals(other.fieldIds, fieldIds)&&const DeepCollectionEquality().equals(other.fields, fields)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&const DeepCollectionEquality().equals(other.items, items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,fieldId,operationDate,status,description,responsibleUserId,startedAt,finishedAt,const DeepCollectionEquality().hash(items));
+int get hashCode => Object.hashAll([runtimeType,id,sequenceNumber,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,const DeepCollectionEquality().hash(fieldIds),const DeepCollectionEquality().hash(fields),operationDate,status,description,responsibleUserId,startedAt,finishedAt,const DeepCollectionEquality().hash(items)]);
 
 @override
 String toString() {
-  return 'FieldOperationDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, fieldId: $fieldId, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, items: $items)';
+  return 'FieldOperationDto(id: $id, sequenceNumber: $sequenceNumber, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, fieldIds: $fieldIds, fields: $fields, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, items: $items)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FieldOperationDtoCopyWith<$Res>  {
   factory $FieldOperationDtoCopyWith(FieldOperationDto value, $Res Function(FieldOperationDto) _then) = _$FieldOperationDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, String fieldId, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, List<FieldOperationItemDto> items
+ String id, int? sequenceNumber, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, List<String> fieldIds, List<FieldOperationFieldRefDto> fields, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, List<FieldOperationItemDto> items
 });
 
 
@@ -65,10 +65,11 @@ class _$FieldOperationDtoCopyWithImpl<$Res>
 
 /// Create a copy of FieldOperationDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? fieldId = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? items = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? sequenceNumber = freezed,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? fieldIds = null,Object? fields = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? items = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
+as String,sequenceNumber: freezed == sequenceNumber ? _self.sequenceNumber : sequenceNumber // ignore: cast_nullable_to_non_nullable
+as int?,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
@@ -76,8 +77,9 @@ as String?,createdByEmail: freezed == createdByEmail ? _self.createdByEmail : cr
 as String?,updatedBy: freezed == updatedBy ? _self.updatedBy : updatedBy // ignore: cast_nullable_to_non_nullable
 as String?,updatedByEmail: freezed == updatedByEmail ? _self.updatedByEmail : updatedByEmail // ignore: cast_nullable_to_non_nullable
 as String?,farmId: null == farmId ? _self.farmId : farmId // ignore: cast_nullable_to_non_nullable
-as String,fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
-as String,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
+as String,fieldIds: null == fieldIds ? _self.fieldIds : fieldIds // ignore: cast_nullable_to_non_nullable
+as List<String>,fields: null == fields ? _self.fields : fields // ignore: cast_nullable_to_non_nullable
+as List<FieldOperationFieldRefDto>,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FieldOperationStatus,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,responsibleUserId: freezed == responsibleUserId ? _self.responsibleUserId : responsibleUserId // ignore: cast_nullable_to_non_nullable
@@ -169,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String fieldId,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  List<FieldOperationItemDto> items)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int? sequenceNumber,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  List<String> fieldIds,  List<FieldOperationFieldRefDto> fields,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  List<FieldOperationItemDto> items)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FieldOperationDto() when $default != null:
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.fieldId,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.items);case _:
+return $default(_that.id,_that.sequenceNumber,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.fieldIds,_that.fields,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.items);case _:
   return orElse();
 
 }
@@ -190,10 +192,10 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String fieldId,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  List<FieldOperationItemDto> items)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int? sequenceNumber,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  List<String> fieldIds,  List<FieldOperationFieldRefDto> fields,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  List<FieldOperationItemDto> items)  $default,) {final _that = this;
 switch (_that) {
 case _FieldOperationDto():
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.fieldId,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.items);case _:
+return $default(_that.id,_that.sequenceNumber,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.fieldIds,_that.fields,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.items);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +212,10 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String fieldId,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  List<FieldOperationItemDto> items)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int? sequenceNumber,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  List<String> fieldIds,  List<FieldOperationFieldRefDto> fields,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  List<FieldOperationItemDto> items)?  $default,) {final _that = this;
 switch (_that) {
 case _FieldOperationDto() when $default != null:
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.fieldId,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.items);case _:
+return $default(_that.id,_that.sequenceNumber,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.fieldIds,_that.fields,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.items);case _:
   return null;
 
 }
@@ -225,10 +227,11 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 @JsonSerializable()
 
 class _FieldOperationDto implements FieldOperationDto {
-  const _FieldOperationDto({required this.id, required this.active, this.createdAt, this.updatedAt, this.createdBy, this.createdByEmail, this.updatedBy, this.updatedByEmail, required this.farmId, required this.fieldId, required this.operationDate, required this.status, this.description, this.responsibleUserId, this.startedAt, this.finishedAt, final  List<FieldOperationItemDto> items = const <FieldOperationItemDto>[]}): _items = items;
+  const _FieldOperationDto({required this.id, this.sequenceNumber, required this.active, this.createdAt, this.updatedAt, this.createdBy, this.createdByEmail, this.updatedBy, this.updatedByEmail, required this.farmId, final  List<String> fieldIds = const <String>[], final  List<FieldOperationFieldRefDto> fields = const <FieldOperationFieldRefDto>[], required this.operationDate, required this.status, this.description, this.responsibleUserId, this.startedAt, this.finishedAt, final  List<FieldOperationItemDto> items = const <FieldOperationItemDto>[]}): _fieldIds = fieldIds,_fields = fields,_items = items;
   factory _FieldOperationDto.fromJson(Map<String, dynamic> json) => _$FieldOperationDtoFromJson(json);
 
 @override final  String id;
+@override final  int? sequenceNumber;
 @override final  bool active;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
@@ -237,7 +240,20 @@ class _FieldOperationDto implements FieldOperationDto {
 @override final  String? updatedBy;
 @override final  String? updatedByEmail;
 @override final  String farmId;
-@override final  String fieldId;
+ final  List<String> _fieldIds;
+@override@JsonKey() List<String> get fieldIds {
+  if (_fieldIds is EqualUnmodifiableListView) return _fieldIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_fieldIds);
+}
+
+ final  List<FieldOperationFieldRefDto> _fields;
+@override@JsonKey() List<FieldOperationFieldRefDto> get fields {
+  if (_fields is EqualUnmodifiableListView) return _fields;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_fields);
+}
+
 @override final  DateTime operationDate;
 @override final  FieldOperationStatus status;
 @override final  String? description;
@@ -265,16 +281,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldOperationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&const DeepCollectionEquality().equals(other._items, _items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldOperationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.sequenceNumber, sequenceNumber) || other.sequenceNumber == sequenceNumber)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&const DeepCollectionEquality().equals(other._fieldIds, _fieldIds)&&const DeepCollectionEquality().equals(other._fields, _fields)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&const DeepCollectionEquality().equals(other._items, _items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,fieldId,operationDate,status,description,responsibleUserId,startedAt,finishedAt,const DeepCollectionEquality().hash(_items));
+int get hashCode => Object.hashAll([runtimeType,id,sequenceNumber,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,const DeepCollectionEquality().hash(_fieldIds),const DeepCollectionEquality().hash(_fields),operationDate,status,description,responsibleUserId,startedAt,finishedAt,const DeepCollectionEquality().hash(_items)]);
 
 @override
 String toString() {
-  return 'FieldOperationDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, fieldId: $fieldId, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, items: $items)';
+  return 'FieldOperationDto(id: $id, sequenceNumber: $sequenceNumber, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, fieldIds: $fieldIds, fields: $fields, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, items: $items)';
 }
 
 
@@ -285,7 +301,7 @@ abstract mixin class _$FieldOperationDtoCopyWith<$Res> implements $FieldOperatio
   factory _$FieldOperationDtoCopyWith(_FieldOperationDto value, $Res Function(_FieldOperationDto) _then) = __$FieldOperationDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, String fieldId, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, List<FieldOperationItemDto> items
+ String id, int? sequenceNumber, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, List<String> fieldIds, List<FieldOperationFieldRefDto> fields, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, List<FieldOperationItemDto> items
 });
 
 
@@ -302,10 +318,11 @@ class __$FieldOperationDtoCopyWithImpl<$Res>
 
 /// Create a copy of FieldOperationDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? fieldId = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? items = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? sequenceNumber = freezed,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? fieldIds = null,Object? fields = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? items = null,}) {
   return _then(_FieldOperationDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
+as String,sequenceNumber: freezed == sequenceNumber ? _self.sequenceNumber : sequenceNumber // ignore: cast_nullable_to_non_nullable
+as int?,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
@@ -313,8 +330,9 @@ as String?,createdByEmail: freezed == createdByEmail ? _self.createdByEmail : cr
 as String?,updatedBy: freezed == updatedBy ? _self.updatedBy : updatedBy // ignore: cast_nullable_to_non_nullable
 as String?,updatedByEmail: freezed == updatedByEmail ? _self.updatedByEmail : updatedByEmail // ignore: cast_nullable_to_non_nullable
 as String?,farmId: null == farmId ? _self.farmId : farmId // ignore: cast_nullable_to_non_nullable
-as String,fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
-as String,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
+as String,fieldIds: null == fieldIds ? _self._fieldIds : fieldIds // ignore: cast_nullable_to_non_nullable
+as List<String>,fields: null == fields ? _self._fields : fields // ignore: cast_nullable_to_non_nullable
+as List<FieldOperationFieldRefDto>,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FieldOperationStatus,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,responsibleUserId: freezed == responsibleUserId ? _self.responsibleUserId : responsibleUserId // ignore: cast_nullable_to_non_nullable
@@ -330,9 +348,278 @@ as List<FieldOperationItemDto>,
 
 
 /// @nodoc
+mixin _$FieldOperationFieldRefDto {
+
+ String get fieldId; String? get name;@OptionalDoubleConverter() double? get areaHectares;
+/// Create a copy of FieldOperationFieldRefDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FieldOperationFieldRefDtoCopyWith<FieldOperationFieldRefDto> get copyWith => _$FieldOperationFieldRefDtoCopyWithImpl<FieldOperationFieldRefDto>(this as FieldOperationFieldRefDto, _$identity);
+
+  /// Serializes this FieldOperationFieldRefDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldOperationFieldRefDto&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.name, name) || other.name == name)&&(identical(other.areaHectares, areaHectares) || other.areaHectares == areaHectares));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,fieldId,name,areaHectares);
+
+@override
+String toString() {
+  return 'FieldOperationFieldRefDto(fieldId: $fieldId, name: $name, areaHectares: $areaHectares)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FieldOperationFieldRefDtoCopyWith<$Res>  {
+  factory $FieldOperationFieldRefDtoCopyWith(FieldOperationFieldRefDto value, $Res Function(FieldOperationFieldRefDto) _then) = _$FieldOperationFieldRefDtoCopyWithImpl;
+@useResult
+$Res call({
+ String fieldId, String? name,@OptionalDoubleConverter() double? areaHectares
+});
+
+
+
+
+}
+/// @nodoc
+class _$FieldOperationFieldRefDtoCopyWithImpl<$Res>
+    implements $FieldOperationFieldRefDtoCopyWith<$Res> {
+  _$FieldOperationFieldRefDtoCopyWithImpl(this._self, this._then);
+
+  final FieldOperationFieldRefDto _self;
+  final $Res Function(FieldOperationFieldRefDto) _then;
+
+/// Create a copy of FieldOperationFieldRefDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? fieldId = null,Object? name = freezed,Object? areaHectares = freezed,}) {
+  return _then(_self.copyWith(
+fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
+as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,areaHectares: freezed == areaHectares ? _self.areaHectares : areaHectares // ignore: cast_nullable_to_non_nullable
+as double?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FieldOperationFieldRefDto].
+extension FieldOperationFieldRefDtoPatterns on FieldOperationFieldRefDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FieldOperationFieldRefDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FieldOperationFieldRefDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FieldOperationFieldRefDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _FieldOperationFieldRefDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FieldOperationFieldRefDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FieldOperationFieldRefDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fieldId,  String? name, @OptionalDoubleConverter()  double? areaHectares)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FieldOperationFieldRefDto() when $default != null:
+return $default(_that.fieldId,_that.name,_that.areaHectares);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fieldId,  String? name, @OptionalDoubleConverter()  double? areaHectares)  $default,) {final _that = this;
+switch (_that) {
+case _FieldOperationFieldRefDto():
+return $default(_that.fieldId,_that.name,_that.areaHectares);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fieldId,  String? name, @OptionalDoubleConverter()  double? areaHectares)?  $default,) {final _that = this;
+switch (_that) {
+case _FieldOperationFieldRefDto() when $default != null:
+return $default(_that.fieldId,_that.name,_that.areaHectares);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FieldOperationFieldRefDto implements FieldOperationFieldRefDto {
+  const _FieldOperationFieldRefDto({required this.fieldId, this.name, @OptionalDoubleConverter() this.areaHectares});
+  factory _FieldOperationFieldRefDto.fromJson(Map<String, dynamic> json) => _$FieldOperationFieldRefDtoFromJson(json);
+
+@override final  String fieldId;
+@override final  String? name;
+@override@OptionalDoubleConverter() final  double? areaHectares;
+
+/// Create a copy of FieldOperationFieldRefDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FieldOperationFieldRefDtoCopyWith<_FieldOperationFieldRefDto> get copyWith => __$FieldOperationFieldRefDtoCopyWithImpl<_FieldOperationFieldRefDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FieldOperationFieldRefDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldOperationFieldRefDto&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.name, name) || other.name == name)&&(identical(other.areaHectares, areaHectares) || other.areaHectares == areaHectares));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,fieldId,name,areaHectares);
+
+@override
+String toString() {
+  return 'FieldOperationFieldRefDto(fieldId: $fieldId, name: $name, areaHectares: $areaHectares)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FieldOperationFieldRefDtoCopyWith<$Res> implements $FieldOperationFieldRefDtoCopyWith<$Res> {
+  factory _$FieldOperationFieldRefDtoCopyWith(_FieldOperationFieldRefDto value, $Res Function(_FieldOperationFieldRefDto) _then) = __$FieldOperationFieldRefDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String fieldId, String? name,@OptionalDoubleConverter() double? areaHectares
+});
+
+
+
+
+}
+/// @nodoc
+class __$FieldOperationFieldRefDtoCopyWithImpl<$Res>
+    implements _$FieldOperationFieldRefDtoCopyWith<$Res> {
+  __$FieldOperationFieldRefDtoCopyWithImpl(this._self, this._then);
+
+  final _FieldOperationFieldRefDto _self;
+  final $Res Function(_FieldOperationFieldRefDto) _then;
+
+/// Create a copy of FieldOperationFieldRefDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? fieldId = null,Object? name = freezed,Object? areaHectares = freezed,}) {
+  return _then(_FieldOperationFieldRefDto(
+fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
+as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,areaHectares: freezed == areaHectares ? _self.areaHectares : areaHectares // ignore: cast_nullable_to_non_nullable
+as double?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$FieldOperationItemDto {
 
- String? get id; bool? get active; DateTime? get createdAt; DateTime? get updatedAt; String? get createdBy; String? get createdByEmail; String? get updatedBy; String? get updatedByEmail; String? get fieldOperationId; String get productId;@DoubleConverter() double get quantitySent;@OptionalDoubleConverter() double? get quantityReturned;@OptionalDoubleConverter() double? get quantityConsumed;@DoubleConverter() double get unitCostAtOperation;@OptionalDoubleConverter() double? get totalCostConsumed; String? get notes;
+ String? get id; bool? get active; DateTime? get createdAt; DateTime? get updatedAt; String? get createdBy; String? get createdByEmail; String? get updatedBy; String? get updatedByEmail; String? get fieldOperationId; String get productId;@DoubleConverter() double get quantitySent;@OptionalDoubleConverter() double? get quantityReturned;@OptionalDoubleConverter() double? get quantityConsumed;@DoubleConverter() double get unitCostAtOperation;@OptionalDoubleConverter() double? get totalCostConsumed; String? get notes; List<FieldOperationItemFieldResultDto> get fieldResults;
 /// Create a copy of FieldOperationItemDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -345,16 +632,16 @@ $FieldOperationItemDtoCopyWith<FieldOperationItemDto> get copyWith => _$FieldOpe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldOperationItemDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.fieldOperationId, fieldOperationId) || other.fieldOperationId == fieldOperationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantitySent, quantitySent) || other.quantitySent == quantitySent)&&(identical(other.quantityReturned, quantityReturned) || other.quantityReturned == quantityReturned)&&(identical(other.quantityConsumed, quantityConsumed) || other.quantityConsumed == quantityConsumed)&&(identical(other.unitCostAtOperation, unitCostAtOperation) || other.unitCostAtOperation == unitCostAtOperation)&&(identical(other.totalCostConsumed, totalCostConsumed) || other.totalCostConsumed == totalCostConsumed)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldOperationItemDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.fieldOperationId, fieldOperationId) || other.fieldOperationId == fieldOperationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantitySent, quantitySent) || other.quantitySent == quantitySent)&&(identical(other.quantityReturned, quantityReturned) || other.quantityReturned == quantityReturned)&&(identical(other.quantityConsumed, quantityConsumed) || other.quantityConsumed == quantityConsumed)&&(identical(other.unitCostAtOperation, unitCostAtOperation) || other.unitCostAtOperation == unitCostAtOperation)&&(identical(other.totalCostConsumed, totalCostConsumed) || other.totalCostConsumed == totalCostConsumed)&&(identical(other.notes, notes) || other.notes == notes)&&const DeepCollectionEquality().equals(other.fieldResults, fieldResults));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,fieldOperationId,productId,quantitySent,quantityReturned,quantityConsumed,unitCostAtOperation,totalCostConsumed,notes);
+int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,fieldOperationId,productId,quantitySent,quantityReturned,quantityConsumed,unitCostAtOperation,totalCostConsumed,notes,const DeepCollectionEquality().hash(fieldResults));
 
 @override
 String toString() {
-  return 'FieldOperationItemDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, fieldOperationId: $fieldOperationId, productId: $productId, quantitySent: $quantitySent, quantityReturned: $quantityReturned, quantityConsumed: $quantityConsumed, unitCostAtOperation: $unitCostAtOperation, totalCostConsumed: $totalCostConsumed, notes: $notes)';
+  return 'FieldOperationItemDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, fieldOperationId: $fieldOperationId, productId: $productId, quantitySent: $quantitySent, quantityReturned: $quantityReturned, quantityConsumed: $quantityConsumed, unitCostAtOperation: $unitCostAtOperation, totalCostConsumed: $totalCostConsumed, notes: $notes, fieldResults: $fieldResults)';
 }
 
 
@@ -365,7 +652,7 @@ abstract mixin class $FieldOperationItemDtoCopyWith<$Res>  {
   factory $FieldOperationItemDtoCopyWith(FieldOperationItemDto value, $Res Function(FieldOperationItemDto) _then) = _$FieldOperationItemDtoCopyWithImpl;
 @useResult
 $Res call({
- String? id, bool? active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String? fieldOperationId, String productId,@DoubleConverter() double quantitySent,@OptionalDoubleConverter() double? quantityReturned,@OptionalDoubleConverter() double? quantityConsumed,@DoubleConverter() double unitCostAtOperation,@OptionalDoubleConverter() double? totalCostConsumed, String? notes
+ String? id, bool? active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String? fieldOperationId, String productId,@DoubleConverter() double quantitySent,@OptionalDoubleConverter() double? quantityReturned,@OptionalDoubleConverter() double? quantityConsumed,@DoubleConverter() double unitCostAtOperation,@OptionalDoubleConverter() double? totalCostConsumed, String? notes, List<FieldOperationItemFieldResultDto> fieldResults
 });
 
 
@@ -382,7 +669,7 @@ class _$FieldOperationItemDtoCopyWithImpl<$Res>
 
 /// Create a copy of FieldOperationItemDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? active = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? fieldOperationId = freezed,Object? productId = null,Object? quantitySent = null,Object? quantityReturned = freezed,Object? quantityConsumed = freezed,Object? unitCostAtOperation = null,Object? totalCostConsumed = freezed,Object? notes = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? active = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? fieldOperationId = freezed,Object? productId = null,Object? quantitySent = null,Object? quantityReturned = freezed,Object? quantityConsumed = freezed,Object? unitCostAtOperation = null,Object? totalCostConsumed = freezed,Object? notes = freezed,Object? fieldResults = null,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,active: freezed == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
@@ -400,7 +687,8 @@ as double?,quantityConsumed: freezed == quantityConsumed ? _self.quantityConsume
 as double?,unitCostAtOperation: null == unitCostAtOperation ? _self.unitCostAtOperation : unitCostAtOperation // ignore: cast_nullable_to_non_nullable
 as double,totalCostConsumed: freezed == totalCostConsumed ? _self.totalCostConsumed : totalCostConsumed // ignore: cast_nullable_to_non_nullable
 as double?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,fieldResults: null == fieldResults ? _self.fieldResults : fieldResults // ignore: cast_nullable_to_non_nullable
+as List<FieldOperationItemFieldResultDto>,
   ));
 }
 
@@ -485,10 +773,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  bool? active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String? fieldOperationId,  String productId, @DoubleConverter()  double quantitySent, @OptionalDoubleConverter()  double? quantityReturned, @OptionalDoubleConverter()  double? quantityConsumed, @DoubleConverter()  double unitCostAtOperation, @OptionalDoubleConverter()  double? totalCostConsumed,  String? notes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? id,  bool? active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String? fieldOperationId,  String productId, @DoubleConverter()  double quantitySent, @OptionalDoubleConverter()  double? quantityReturned, @OptionalDoubleConverter()  double? quantityConsumed, @DoubleConverter()  double unitCostAtOperation, @OptionalDoubleConverter()  double? totalCostConsumed,  String? notes,  List<FieldOperationItemFieldResultDto> fieldResults)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FieldOperationItemDto() when $default != null:
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.fieldOperationId,_that.productId,_that.quantitySent,_that.quantityReturned,_that.quantityConsumed,_that.unitCostAtOperation,_that.totalCostConsumed,_that.notes);case _:
+return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.fieldOperationId,_that.productId,_that.quantitySent,_that.quantityReturned,_that.quantityConsumed,_that.unitCostAtOperation,_that.totalCostConsumed,_that.notes,_that.fieldResults);case _:
   return orElse();
 
 }
@@ -506,10 +794,10 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  bool? active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String? fieldOperationId,  String productId, @DoubleConverter()  double quantitySent, @OptionalDoubleConverter()  double? quantityReturned, @OptionalDoubleConverter()  double? quantityConsumed, @DoubleConverter()  double unitCostAtOperation, @OptionalDoubleConverter()  double? totalCostConsumed,  String? notes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? id,  bool? active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String? fieldOperationId,  String productId, @DoubleConverter()  double quantitySent, @OptionalDoubleConverter()  double? quantityReturned, @OptionalDoubleConverter()  double? quantityConsumed, @DoubleConverter()  double unitCostAtOperation, @OptionalDoubleConverter()  double? totalCostConsumed,  String? notes,  List<FieldOperationItemFieldResultDto> fieldResults)  $default,) {final _that = this;
 switch (_that) {
 case _FieldOperationItemDto():
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.fieldOperationId,_that.productId,_that.quantitySent,_that.quantityReturned,_that.quantityConsumed,_that.unitCostAtOperation,_that.totalCostConsumed,_that.notes);case _:
+return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.fieldOperationId,_that.productId,_that.quantitySent,_that.quantityReturned,_that.quantityConsumed,_that.unitCostAtOperation,_that.totalCostConsumed,_that.notes,_that.fieldResults);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -526,10 +814,10 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  bool? active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String? fieldOperationId,  String productId, @DoubleConverter()  double quantitySent, @OptionalDoubleConverter()  double? quantityReturned, @OptionalDoubleConverter()  double? quantityConsumed, @DoubleConverter()  double unitCostAtOperation, @OptionalDoubleConverter()  double? totalCostConsumed,  String? notes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? id,  bool? active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String? fieldOperationId,  String productId, @DoubleConverter()  double quantitySent, @OptionalDoubleConverter()  double? quantityReturned, @OptionalDoubleConverter()  double? quantityConsumed, @DoubleConverter()  double unitCostAtOperation, @OptionalDoubleConverter()  double? totalCostConsumed,  String? notes,  List<FieldOperationItemFieldResultDto> fieldResults)?  $default,) {final _that = this;
 switch (_that) {
 case _FieldOperationItemDto() when $default != null:
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.fieldOperationId,_that.productId,_that.quantitySent,_that.quantityReturned,_that.quantityConsumed,_that.unitCostAtOperation,_that.totalCostConsumed,_that.notes);case _:
+return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.fieldOperationId,_that.productId,_that.quantitySent,_that.quantityReturned,_that.quantityConsumed,_that.unitCostAtOperation,_that.totalCostConsumed,_that.notes,_that.fieldResults);case _:
   return null;
 
 }
@@ -541,7 +829,7 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 @JsonSerializable()
 
 class _FieldOperationItemDto implements FieldOperationItemDto {
-  const _FieldOperationItemDto({this.id, this.active, this.createdAt, this.updatedAt, this.createdBy, this.createdByEmail, this.updatedBy, this.updatedByEmail, this.fieldOperationId, required this.productId, @DoubleConverter() required this.quantitySent, @OptionalDoubleConverter() this.quantityReturned, @OptionalDoubleConverter() this.quantityConsumed, @DoubleConverter() required this.unitCostAtOperation, @OptionalDoubleConverter() this.totalCostConsumed, this.notes});
+  const _FieldOperationItemDto({this.id, this.active, this.createdAt, this.updatedAt, this.createdBy, this.createdByEmail, this.updatedBy, this.updatedByEmail, this.fieldOperationId, required this.productId, @DoubleConverter() required this.quantitySent, @OptionalDoubleConverter() this.quantityReturned, @OptionalDoubleConverter() this.quantityConsumed, @DoubleConverter() required this.unitCostAtOperation, @OptionalDoubleConverter() this.totalCostConsumed, this.notes, final  List<FieldOperationItemFieldResultDto> fieldResults = const <FieldOperationItemFieldResultDto>[]}): _fieldResults = fieldResults;
   factory _FieldOperationItemDto.fromJson(Map<String, dynamic> json) => _$FieldOperationItemDtoFromJson(json);
 
 @override final  String? id;
@@ -560,6 +848,13 @@ class _FieldOperationItemDto implements FieldOperationItemDto {
 @override@DoubleConverter() final  double unitCostAtOperation;
 @override@OptionalDoubleConverter() final  double? totalCostConsumed;
 @override final  String? notes;
+ final  List<FieldOperationItemFieldResultDto> _fieldResults;
+@override@JsonKey() List<FieldOperationItemFieldResultDto> get fieldResults {
+  if (_fieldResults is EqualUnmodifiableListView) return _fieldResults;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_fieldResults);
+}
+
 
 /// Create a copy of FieldOperationItemDto
 /// with the given fields replaced by the non-null parameter values.
@@ -574,16 +869,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldOperationItemDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.fieldOperationId, fieldOperationId) || other.fieldOperationId == fieldOperationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantitySent, quantitySent) || other.quantitySent == quantitySent)&&(identical(other.quantityReturned, quantityReturned) || other.quantityReturned == quantityReturned)&&(identical(other.quantityConsumed, quantityConsumed) || other.quantityConsumed == quantityConsumed)&&(identical(other.unitCostAtOperation, unitCostAtOperation) || other.unitCostAtOperation == unitCostAtOperation)&&(identical(other.totalCostConsumed, totalCostConsumed) || other.totalCostConsumed == totalCostConsumed)&&(identical(other.notes, notes) || other.notes == notes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldOperationItemDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.fieldOperationId, fieldOperationId) || other.fieldOperationId == fieldOperationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantitySent, quantitySent) || other.quantitySent == quantitySent)&&(identical(other.quantityReturned, quantityReturned) || other.quantityReturned == quantityReturned)&&(identical(other.quantityConsumed, quantityConsumed) || other.quantityConsumed == quantityConsumed)&&(identical(other.unitCostAtOperation, unitCostAtOperation) || other.unitCostAtOperation == unitCostAtOperation)&&(identical(other.totalCostConsumed, totalCostConsumed) || other.totalCostConsumed == totalCostConsumed)&&(identical(other.notes, notes) || other.notes == notes)&&const DeepCollectionEquality().equals(other._fieldResults, _fieldResults));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,fieldOperationId,productId,quantitySent,quantityReturned,quantityConsumed,unitCostAtOperation,totalCostConsumed,notes);
+int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,fieldOperationId,productId,quantitySent,quantityReturned,quantityConsumed,unitCostAtOperation,totalCostConsumed,notes,const DeepCollectionEquality().hash(_fieldResults));
 
 @override
 String toString() {
-  return 'FieldOperationItemDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, fieldOperationId: $fieldOperationId, productId: $productId, quantitySent: $quantitySent, quantityReturned: $quantityReturned, quantityConsumed: $quantityConsumed, unitCostAtOperation: $unitCostAtOperation, totalCostConsumed: $totalCostConsumed, notes: $notes)';
+  return 'FieldOperationItemDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, fieldOperationId: $fieldOperationId, productId: $productId, quantitySent: $quantitySent, quantityReturned: $quantityReturned, quantityConsumed: $quantityConsumed, unitCostAtOperation: $unitCostAtOperation, totalCostConsumed: $totalCostConsumed, notes: $notes, fieldResults: $fieldResults)';
 }
 
 
@@ -594,7 +889,7 @@ abstract mixin class _$FieldOperationItemDtoCopyWith<$Res> implements $FieldOper
   factory _$FieldOperationItemDtoCopyWith(_FieldOperationItemDto value, $Res Function(_FieldOperationItemDto) _then) = __$FieldOperationItemDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String? id, bool? active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String? fieldOperationId, String productId,@DoubleConverter() double quantitySent,@OptionalDoubleConverter() double? quantityReturned,@OptionalDoubleConverter() double? quantityConsumed,@DoubleConverter() double unitCostAtOperation,@OptionalDoubleConverter() double? totalCostConsumed, String? notes
+ String? id, bool? active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String? fieldOperationId, String productId,@DoubleConverter() double quantitySent,@OptionalDoubleConverter() double? quantityReturned,@OptionalDoubleConverter() double? quantityConsumed,@DoubleConverter() double unitCostAtOperation,@OptionalDoubleConverter() double? totalCostConsumed, String? notes, List<FieldOperationItemFieldResultDto> fieldResults
 });
 
 
@@ -611,7 +906,7 @@ class __$FieldOperationItemDtoCopyWithImpl<$Res>
 
 /// Create a copy of FieldOperationItemDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? active = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? fieldOperationId = freezed,Object? productId = null,Object? quantitySent = null,Object? quantityReturned = freezed,Object? quantityConsumed = freezed,Object? unitCostAtOperation = null,Object? totalCostConsumed = freezed,Object? notes = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? active = freezed,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? fieldOperationId = freezed,Object? productId = null,Object? quantitySent = null,Object? quantityReturned = freezed,Object? quantityConsumed = freezed,Object? unitCostAtOperation = null,Object? totalCostConsumed = freezed,Object? notes = freezed,Object? fieldResults = null,}) {
   return _then(_FieldOperationItemDto(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String?,active: freezed == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
@@ -629,7 +924,280 @@ as double?,quantityConsumed: freezed == quantityConsumed ? _self.quantityConsume
 as double?,unitCostAtOperation: null == unitCostAtOperation ? _self.unitCostAtOperation : unitCostAtOperation // ignore: cast_nullable_to_non_nullable
 as double,totalCostConsumed: freezed == totalCostConsumed ? _self.totalCostConsumed : totalCostConsumed // ignore: cast_nullable_to_non_nullable
 as double?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,fieldResults: null == fieldResults ? _self._fieldResults : fieldResults // ignore: cast_nullable_to_non_nullable
+as List<FieldOperationItemFieldResultDto>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$FieldOperationItemFieldResultDto {
+
+ String get fieldId; String? get fieldName;@OptionalDoubleConverter() double? get allocatedQuantityConsumed;@OptionalDoubleConverter() double? get allocatedCostConsumed;
+/// Create a copy of FieldOperationItemFieldResultDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FieldOperationItemFieldResultDtoCopyWith<FieldOperationItemFieldResultDto> get copyWith => _$FieldOperationItemFieldResultDtoCopyWithImpl<FieldOperationItemFieldResultDto>(this as FieldOperationItemFieldResultDto, _$identity);
+
+  /// Serializes this FieldOperationItemFieldResultDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldOperationItemFieldResultDto&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.fieldName, fieldName) || other.fieldName == fieldName)&&(identical(other.allocatedQuantityConsumed, allocatedQuantityConsumed) || other.allocatedQuantityConsumed == allocatedQuantityConsumed)&&(identical(other.allocatedCostConsumed, allocatedCostConsumed) || other.allocatedCostConsumed == allocatedCostConsumed));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,fieldId,fieldName,allocatedQuantityConsumed,allocatedCostConsumed);
+
+@override
+String toString() {
+  return 'FieldOperationItemFieldResultDto(fieldId: $fieldId, fieldName: $fieldName, allocatedQuantityConsumed: $allocatedQuantityConsumed, allocatedCostConsumed: $allocatedCostConsumed)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FieldOperationItemFieldResultDtoCopyWith<$Res>  {
+  factory $FieldOperationItemFieldResultDtoCopyWith(FieldOperationItemFieldResultDto value, $Res Function(FieldOperationItemFieldResultDto) _then) = _$FieldOperationItemFieldResultDtoCopyWithImpl;
+@useResult
+$Res call({
+ String fieldId, String? fieldName,@OptionalDoubleConverter() double? allocatedQuantityConsumed,@OptionalDoubleConverter() double? allocatedCostConsumed
+});
+
+
+
+
+}
+/// @nodoc
+class _$FieldOperationItemFieldResultDtoCopyWithImpl<$Res>
+    implements $FieldOperationItemFieldResultDtoCopyWith<$Res> {
+  _$FieldOperationItemFieldResultDtoCopyWithImpl(this._self, this._then);
+
+  final FieldOperationItemFieldResultDto _self;
+  final $Res Function(FieldOperationItemFieldResultDto) _then;
+
+/// Create a copy of FieldOperationItemFieldResultDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? fieldId = null,Object? fieldName = freezed,Object? allocatedQuantityConsumed = freezed,Object? allocatedCostConsumed = freezed,}) {
+  return _then(_self.copyWith(
+fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
+as String,fieldName: freezed == fieldName ? _self.fieldName : fieldName // ignore: cast_nullable_to_non_nullable
+as String?,allocatedQuantityConsumed: freezed == allocatedQuantityConsumed ? _self.allocatedQuantityConsumed : allocatedQuantityConsumed // ignore: cast_nullable_to_non_nullable
+as double?,allocatedCostConsumed: freezed == allocatedCostConsumed ? _self.allocatedCostConsumed : allocatedCostConsumed // ignore: cast_nullable_to_non_nullable
+as double?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FieldOperationItemFieldResultDto].
+extension FieldOperationItemFieldResultDtoPatterns on FieldOperationItemFieldResultDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FieldOperationItemFieldResultDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FieldOperationItemFieldResultDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FieldOperationItemFieldResultDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _FieldOperationItemFieldResultDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FieldOperationItemFieldResultDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FieldOperationItemFieldResultDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String fieldId,  String? fieldName, @OptionalDoubleConverter()  double? allocatedQuantityConsumed, @OptionalDoubleConverter()  double? allocatedCostConsumed)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FieldOperationItemFieldResultDto() when $default != null:
+return $default(_that.fieldId,_that.fieldName,_that.allocatedQuantityConsumed,_that.allocatedCostConsumed);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String fieldId,  String? fieldName, @OptionalDoubleConverter()  double? allocatedQuantityConsumed, @OptionalDoubleConverter()  double? allocatedCostConsumed)  $default,) {final _that = this;
+switch (_that) {
+case _FieldOperationItemFieldResultDto():
+return $default(_that.fieldId,_that.fieldName,_that.allocatedQuantityConsumed,_that.allocatedCostConsumed);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String fieldId,  String? fieldName, @OptionalDoubleConverter()  double? allocatedQuantityConsumed, @OptionalDoubleConverter()  double? allocatedCostConsumed)?  $default,) {final _that = this;
+switch (_that) {
+case _FieldOperationItemFieldResultDto() when $default != null:
+return $default(_that.fieldId,_that.fieldName,_that.allocatedQuantityConsumed,_that.allocatedCostConsumed);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FieldOperationItemFieldResultDto implements FieldOperationItemFieldResultDto {
+  const _FieldOperationItemFieldResultDto({required this.fieldId, this.fieldName, @OptionalDoubleConverter() this.allocatedQuantityConsumed, @OptionalDoubleConverter() this.allocatedCostConsumed});
+  factory _FieldOperationItemFieldResultDto.fromJson(Map<String, dynamic> json) => _$FieldOperationItemFieldResultDtoFromJson(json);
+
+@override final  String fieldId;
+@override final  String? fieldName;
+@override@OptionalDoubleConverter() final  double? allocatedQuantityConsumed;
+@override@OptionalDoubleConverter() final  double? allocatedCostConsumed;
+
+/// Create a copy of FieldOperationItemFieldResultDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FieldOperationItemFieldResultDtoCopyWith<_FieldOperationItemFieldResultDto> get copyWith => __$FieldOperationItemFieldResultDtoCopyWithImpl<_FieldOperationItemFieldResultDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FieldOperationItemFieldResultDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldOperationItemFieldResultDto&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.fieldName, fieldName) || other.fieldName == fieldName)&&(identical(other.allocatedQuantityConsumed, allocatedQuantityConsumed) || other.allocatedQuantityConsumed == allocatedQuantityConsumed)&&(identical(other.allocatedCostConsumed, allocatedCostConsumed) || other.allocatedCostConsumed == allocatedCostConsumed));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,fieldId,fieldName,allocatedQuantityConsumed,allocatedCostConsumed);
+
+@override
+String toString() {
+  return 'FieldOperationItemFieldResultDto(fieldId: $fieldId, fieldName: $fieldName, allocatedQuantityConsumed: $allocatedQuantityConsumed, allocatedCostConsumed: $allocatedCostConsumed)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FieldOperationItemFieldResultDtoCopyWith<$Res> implements $FieldOperationItemFieldResultDtoCopyWith<$Res> {
+  factory _$FieldOperationItemFieldResultDtoCopyWith(_FieldOperationItemFieldResultDto value, $Res Function(_FieldOperationItemFieldResultDto) _then) = __$FieldOperationItemFieldResultDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String fieldId, String? fieldName,@OptionalDoubleConverter() double? allocatedQuantityConsumed,@OptionalDoubleConverter() double? allocatedCostConsumed
+});
+
+
+
+
+}
+/// @nodoc
+class __$FieldOperationItemFieldResultDtoCopyWithImpl<$Res>
+    implements _$FieldOperationItemFieldResultDtoCopyWith<$Res> {
+  __$FieldOperationItemFieldResultDtoCopyWithImpl(this._self, this._then);
+
+  final _FieldOperationItemFieldResultDto _self;
+  final $Res Function(_FieldOperationItemFieldResultDto) _then;
+
+/// Create a copy of FieldOperationItemFieldResultDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? fieldId = null,Object? fieldName = freezed,Object? allocatedQuantityConsumed = freezed,Object? allocatedCostConsumed = freezed,}) {
+  return _then(_FieldOperationItemFieldResultDto(
+fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
+as String,fieldName: freezed == fieldName ? _self.fieldName : fieldName // ignore: cast_nullable_to_non_nullable
+as String?,allocatedQuantityConsumed: freezed == allocatedQuantityConsumed ? _self.allocatedQuantityConsumed : allocatedQuantityConsumed // ignore: cast_nullable_to_non_nullable
+as double?,allocatedCostConsumed: freezed == allocatedCostConsumed ? _self.allocatedCostConsumed : allocatedCostConsumed // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -640,7 +1208,7 @@ as String?,
 /// @nodoc
 mixin _$CreateFieldOperationRequestDto {
 
- String get farmId; String get fieldId; DateTime get operationDate; FieldOperationStatus get status; String? get description; String? get responsibleUserId; DateTime? get startedAt; DateTime? get finishedAt; bool get active; List<CreateFieldOperationItemRequestDto> get items;
+ String get farmId; List<String> get fieldIds; DateTime get operationDate; FieldOperationStatus get status; String? get description; String? get responsibleUserId; DateTime? get startedAt; DateTime? get finishedAt; bool get active; List<CreateFieldOperationItemRequestDto> get items;
 /// Create a copy of CreateFieldOperationRequestDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -653,16 +1221,16 @@ $CreateFieldOperationRequestDtoCopyWith<CreateFieldOperationRequestDto> get copy
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateFieldOperationRequestDto&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&(identical(other.active, active) || other.active == active)&&const DeepCollectionEquality().equals(other.items, items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CreateFieldOperationRequestDto&&(identical(other.farmId, farmId) || other.farmId == farmId)&&const DeepCollectionEquality().equals(other.fieldIds, fieldIds)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&(identical(other.active, active) || other.active == active)&&const DeepCollectionEquality().equals(other.items, items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,farmId,fieldId,operationDate,status,description,responsibleUserId,startedAt,finishedAt,active,const DeepCollectionEquality().hash(items));
+int get hashCode => Object.hash(runtimeType,farmId,const DeepCollectionEquality().hash(fieldIds),operationDate,status,description,responsibleUserId,startedAt,finishedAt,active,const DeepCollectionEquality().hash(items));
 
 @override
 String toString() {
-  return 'CreateFieldOperationRequestDto(farmId: $farmId, fieldId: $fieldId, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, active: $active, items: $items)';
+  return 'CreateFieldOperationRequestDto(farmId: $farmId, fieldIds: $fieldIds, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, active: $active, items: $items)';
 }
 
 
@@ -673,7 +1241,7 @@ abstract mixin class $CreateFieldOperationRequestDtoCopyWith<$Res>  {
   factory $CreateFieldOperationRequestDtoCopyWith(CreateFieldOperationRequestDto value, $Res Function(CreateFieldOperationRequestDto) _then) = _$CreateFieldOperationRequestDtoCopyWithImpl;
 @useResult
 $Res call({
- String farmId, String fieldId, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, bool active, List<CreateFieldOperationItemRequestDto> items
+ String farmId, List<String> fieldIds, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, bool active, List<CreateFieldOperationItemRequestDto> items
 });
 
 
@@ -690,11 +1258,11 @@ class _$CreateFieldOperationRequestDtoCopyWithImpl<$Res>
 
 /// Create a copy of CreateFieldOperationRequestDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? farmId = null,Object? fieldId = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? active = null,Object? items = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? farmId = null,Object? fieldIds = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? active = null,Object? items = null,}) {
   return _then(_self.copyWith(
 farmId: null == farmId ? _self.farmId : farmId // ignore: cast_nullable_to_non_nullable
-as String,fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
-as String,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
+as String,fieldIds: null == fieldIds ? _self.fieldIds : fieldIds // ignore: cast_nullable_to_non_nullable
+as List<String>,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FieldOperationStatus,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,responsibleUserId: freezed == responsibleUserId ? _self.responsibleUserId : responsibleUserId // ignore: cast_nullable_to_non_nullable
@@ -787,10 +1355,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String farmId,  String fieldId,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  bool active,  List<CreateFieldOperationItemRequestDto> items)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String farmId,  List<String> fieldIds,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  bool active,  List<CreateFieldOperationItemRequestDto> items)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateFieldOperationRequestDto() when $default != null:
-return $default(_that.farmId,_that.fieldId,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.active,_that.items);case _:
+return $default(_that.farmId,_that.fieldIds,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.active,_that.items);case _:
   return orElse();
 
 }
@@ -808,10 +1376,10 @@ return $default(_that.farmId,_that.fieldId,_that.operationDate,_that.status,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String farmId,  String fieldId,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  bool active,  List<CreateFieldOperationItemRequestDto> items)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String farmId,  List<String> fieldIds,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  bool active,  List<CreateFieldOperationItemRequestDto> items)  $default,) {final _that = this;
 switch (_that) {
 case _CreateFieldOperationRequestDto():
-return $default(_that.farmId,_that.fieldId,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.active,_that.items);case _:
+return $default(_that.farmId,_that.fieldIds,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.active,_that.items);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -828,10 +1396,10 @@ return $default(_that.farmId,_that.fieldId,_that.operationDate,_that.status,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String farmId,  String fieldId,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  bool active,  List<CreateFieldOperationItemRequestDto> items)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String farmId,  List<String> fieldIds,  DateTime operationDate,  FieldOperationStatus status,  String? description,  String? responsibleUserId,  DateTime? startedAt,  DateTime? finishedAt,  bool active,  List<CreateFieldOperationItemRequestDto> items)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateFieldOperationRequestDto() when $default != null:
-return $default(_that.farmId,_that.fieldId,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.active,_that.items);case _:
+return $default(_that.farmId,_that.fieldIds,_that.operationDate,_that.status,_that.description,_that.responsibleUserId,_that.startedAt,_that.finishedAt,_that.active,_that.items);case _:
   return null;
 
 }
@@ -843,11 +1411,17 @@ return $default(_that.farmId,_that.fieldId,_that.operationDate,_that.status,_tha
 @JsonSerializable()
 
 class _CreateFieldOperationRequestDto implements CreateFieldOperationRequestDto {
-  const _CreateFieldOperationRequestDto({required this.farmId, required this.fieldId, required this.operationDate, this.status = FieldOperationStatus.open, this.description, this.responsibleUserId, this.startedAt, this.finishedAt, this.active = true, final  List<CreateFieldOperationItemRequestDto> items = const <CreateFieldOperationItemRequestDto>[]}): _items = items;
+  const _CreateFieldOperationRequestDto({required this.farmId, final  List<String> fieldIds = const <String>[], required this.operationDate, this.status = FieldOperationStatus.open, this.description, this.responsibleUserId, this.startedAt, this.finishedAt, this.active = true, final  List<CreateFieldOperationItemRequestDto> items = const <CreateFieldOperationItemRequestDto>[]}): _fieldIds = fieldIds,_items = items;
   factory _CreateFieldOperationRequestDto.fromJson(Map<String, dynamic> json) => _$CreateFieldOperationRequestDtoFromJson(json);
 
 @override final  String farmId;
-@override final  String fieldId;
+ final  List<String> _fieldIds;
+@override@JsonKey() List<String> get fieldIds {
+  if (_fieldIds is EqualUnmodifiableListView) return _fieldIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_fieldIds);
+}
+
 @override final  DateTime operationDate;
 @override@JsonKey() final  FieldOperationStatus status;
 @override final  String? description;
@@ -876,16 +1450,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateFieldOperationRequestDto&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.fieldId, fieldId) || other.fieldId == fieldId)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&(identical(other.active, active) || other.active == active)&&const DeepCollectionEquality().equals(other._items, _items));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateFieldOperationRequestDto&&(identical(other.farmId, farmId) || other.farmId == farmId)&&const DeepCollectionEquality().equals(other._fieldIds, _fieldIds)&&(identical(other.operationDate, operationDate) || other.operationDate == operationDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.description, description) || other.description == description)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.finishedAt, finishedAt) || other.finishedAt == finishedAt)&&(identical(other.active, active) || other.active == active)&&const DeepCollectionEquality().equals(other._items, _items));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,farmId,fieldId,operationDate,status,description,responsibleUserId,startedAt,finishedAt,active,const DeepCollectionEquality().hash(_items));
+int get hashCode => Object.hash(runtimeType,farmId,const DeepCollectionEquality().hash(_fieldIds),operationDate,status,description,responsibleUserId,startedAt,finishedAt,active,const DeepCollectionEquality().hash(_items));
 
 @override
 String toString() {
-  return 'CreateFieldOperationRequestDto(farmId: $farmId, fieldId: $fieldId, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, active: $active, items: $items)';
+  return 'CreateFieldOperationRequestDto(farmId: $farmId, fieldIds: $fieldIds, operationDate: $operationDate, status: $status, description: $description, responsibleUserId: $responsibleUserId, startedAt: $startedAt, finishedAt: $finishedAt, active: $active, items: $items)';
 }
 
 
@@ -896,7 +1470,7 @@ abstract mixin class _$CreateFieldOperationRequestDtoCopyWith<$Res> implements $
   factory _$CreateFieldOperationRequestDtoCopyWith(_CreateFieldOperationRequestDto value, $Res Function(_CreateFieldOperationRequestDto) _then) = __$CreateFieldOperationRequestDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String farmId, String fieldId, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, bool active, List<CreateFieldOperationItemRequestDto> items
+ String farmId, List<String> fieldIds, DateTime operationDate, FieldOperationStatus status, String? description, String? responsibleUserId, DateTime? startedAt, DateTime? finishedAt, bool active, List<CreateFieldOperationItemRequestDto> items
 });
 
 
@@ -913,11 +1487,11 @@ class __$CreateFieldOperationRequestDtoCopyWithImpl<$Res>
 
 /// Create a copy of CreateFieldOperationRequestDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? farmId = null,Object? fieldId = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? active = null,Object? items = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? farmId = null,Object? fieldIds = null,Object? operationDate = null,Object? status = null,Object? description = freezed,Object? responsibleUserId = freezed,Object? startedAt = freezed,Object? finishedAt = freezed,Object? active = null,Object? items = null,}) {
   return _then(_CreateFieldOperationRequestDto(
 farmId: null == farmId ? _self.farmId : farmId // ignore: cast_nullable_to_non_nullable
-as String,fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
-as String,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
+as String,fieldIds: null == fieldIds ? _self._fieldIds : fieldIds // ignore: cast_nullable_to_non_nullable
+as List<String>,operationDate: null == operationDate ? _self.operationDate : operationDate // ignore: cast_nullable_to_non_nullable
 as DateTime,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FieldOperationStatus,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,responsibleUserId: freezed == responsibleUserId ? _self.responsibleUserId : responsibleUserId // ignore: cast_nullable_to_non_nullable

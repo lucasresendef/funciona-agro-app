@@ -1,7 +1,9 @@
+import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
 import 'package:field_management_app/core/utils/formatters.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_destructive.dart';
+import 'package:field_management_app/design_system/components/app_detail_dialog.dart';
 import 'package:field_management_app/design_system/components/app_form_actions.dart';
 import 'package:field_management_app/design_system/components/app_form_sheet.dart';
 import 'package:field_management_app/design_system/components/app_page.dart';
@@ -25,15 +27,17 @@ class FarmsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final farmsAsync = ref.watch(farmsInfiniteListProvider);
     final filter = ref.watch(farmsFilterProvider);
+    final isAdmin = ref.watch(isAdminProvider);
 
     return AppPage(
       title: 'Fazendas',
       actions: [
-        IconButton.filled(
-          tooltip: 'Nova fazenda',
-          onPressed: () => _showCreateFarmDialog(context),
-          icon: const Icon(Icons.add_rounded),
-        ),
+        if (isAdmin)
+          IconButton.filled(
+            tooltip: 'Nova fazenda',
+            onPressed: () => _showCreateFarmDialog(context),
+            icon: const Icon(Icons.add_rounded),
+          ),
       ],
       child: Column(
         children: [
@@ -82,6 +86,7 @@ class FarmsPage extends ConsumerWidget {
                   itemBuilder: (context, farm, _) {
                     return _FarmTile(
                       farm: farm,
+                      canManage: isAdmin,
                       onEdit: () => _showEditFarmDialog(context, farm),
                       onDelete: () => _confirmDeleteFarm(context, ref, farm),
                     );
@@ -143,11 +148,13 @@ class FarmsPage extends ConsumerWidget {
 class _FarmTile extends StatelessWidget {
   const _FarmTile({
     required this.farm,
+    required this.canManage,
     required this.onEdit,
     required this.onDelete,
   });
 
   final Farm farm;
+  final bool canManage;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -155,7 +162,7 @@ class _FarmTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       child: ListTile(
-        onTap: () => _showFarmDetailsSheet(context, farm, onEdit, onDelete),
+        onTap: () => _showFarmDetailsSheet(context, farm, canManage, onEdit, onDelete),
         contentPadding: EdgeInsets.zero,
         leading: const CircleAvatar(child: Icon(Icons.agriculture_outlined)),
         title: Text(farm.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -178,77 +185,19 @@ class _FarmTile extends StatelessWidget {
 void _showFarmDetailsSheet(
   BuildContext context,
   Farm farm,
+  bool canManage,
   VoidCallback onEdit,
   VoidCallback onDelete,
 ) {
-  showModalBottomSheet<void>(
+  showAppDetailDialog<void>(
     context: context,
-    showDragHandle: true,
-    useSafeArea: true,
-    builder: (context) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.sm,
-          AppSpacing.md,
-          AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              farm.name,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                Chip(label: Text(farm.metadata.active ? 'Ativa' : 'Inativa')),
-              ],
-            ),
-            if (farm.description != null && farm.description!.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(farm.description!),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onEdit();
-                    },
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Editar'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onDelete();
-                    },
-                    style: AppDestructive.outlinedStyle(context),
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: AppDestructive.iconColor(context),
-                    ),
-                    label: const Text('Excluir'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
+    title: farm.name,
+    canManage: canManage,
+    onEdit: onEdit,
+    onDelete: onDelete,
+    content: Text(
+      farm.description?.isNotEmpty == true ? farm.description! : 'Sem descrição',
+    ),
   );
 }
 

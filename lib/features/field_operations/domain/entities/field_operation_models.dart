@@ -66,8 +66,10 @@ class OptionalDoubleConverter implements JsonConverter<double?, dynamic> {
 abstract class FieldOperation with _$FieldOperation {
   const factory FieldOperation({
     required AuditMetadata metadata,
+    int? sequenceNumber,
     required String farmId,
-    required String fieldId,
+    @Default(<String>[]) List<String> fieldIds,
+    @Default(<FieldOperationFieldRef>[]) List<FieldOperationFieldRef> fields,
     required DateTime operationDate,
     required FieldOperationStatus status,
     String? description,
@@ -82,6 +84,18 @@ abstract class FieldOperation with _$FieldOperation {
 }
 
 @freezed
+abstract class FieldOperationFieldRef with _$FieldOperationFieldRef {
+  const factory FieldOperationFieldRef({
+    required String fieldId,
+    String? name,
+    @OptionalDoubleConverter() double? areaHectares,
+  }) = _FieldOperationFieldRef;
+
+  factory FieldOperationFieldRef.fromJson(Map<String, dynamic> json) =>
+      _$FieldOperationFieldRefFromJson(json);
+}
+
+@freezed
 abstract class FieldOperationItem with _$FieldOperationItem {
   const factory FieldOperationItem({
     AuditMetadata? metadata,
@@ -93,6 +107,8 @@ abstract class FieldOperationItem with _$FieldOperationItem {
     @DoubleConverter() required double unitCostAtOperation,
     @OptionalDoubleConverter() double? totalCostConsumed,
     String? notes,
+    @Default(<FieldOperationItemFieldResult>[])
+    List<FieldOperationItemFieldResult> fieldResults,
   }) = _FieldOperationItem;
 
   factory FieldOperationItem.fromJson(Map<String, dynamic> json) =>
@@ -100,10 +116,24 @@ abstract class FieldOperationItem with _$FieldOperationItem {
 }
 
 @freezed
+abstract class FieldOperationItemFieldResult
+    with _$FieldOperationItemFieldResult {
+  const factory FieldOperationItemFieldResult({
+    required String fieldId,
+    String? fieldName,
+    @OptionalDoubleConverter() double? allocatedQuantityConsumed,
+    @OptionalDoubleConverter() double? allocatedCostConsumed,
+  }) = _FieldOperationItemFieldResult;
+
+  factory FieldOperationItemFieldResult.fromJson(Map<String, dynamic> json) =>
+      _$FieldOperationItemFieldResultFromJson(json);
+}
+
+@freezed
 abstract class CreateFieldOperationInput with _$CreateFieldOperationInput {
   const factory CreateFieldOperationInput({
     required String farmId,
-    required String fieldId,
+    @Default(<String>[]) List<String> fieldIds,
     required DateTime operationDate,
     @Default(FieldOperationStatus.open) FieldOperationStatus status,
     String? description,

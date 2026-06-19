@@ -3,6 +3,7 @@ import 'package:field_management_app/core/utils/async_value_ui.dart';
 import 'package:field_management_app/design_system/components/app_action_button.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_destructive.dart';
+import 'package:field_management_app/design_system/components/app_confirm_dialog.dart';
 import 'package:field_management_app/design_system/components/app_dropdown_field.dart';
 import 'package:field_management_app/design_system/components/app_form_sheet.dart';
 import 'package:field_management_app/design_system/components/app_field_loading.dart';
@@ -36,11 +37,9 @@ class FieldOperationsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final operationsAsync = ref.watch(fieldOperationsInfiniteListProvider);
-    final farmsAsync = ref.watch(allActiveFarmsProvider);
     final filter = ref.watch(fieldOperationsFilterProvider);
     final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
-    final resolvedFarmId = filter.farmId ?? selectedFarmId;
-    final fieldsByFarmAsync = ref.watch(fieldsByFarmProvider(resolvedFarmId));
+    final fieldsByFarmAsync = ref.watch(fieldsByFarmProvider(selectedFarmId));
     final fieldNameById = fieldsByFarmAsync.maybeWhen(
       data: (fields) => <String, String>{
         for (final field in fields) field.metadata.id: field.name,
@@ -62,60 +61,33 @@ class FieldOperationsPage extends ConsumerWidget {
       ],
       child: Column(
         children: [
-          AppSearchBar(
-            hintText: 'Filtre as operações',
-            onChanged: (_) {},
-            trailing: [
-              farmsAsync.maybeWhen(
-                data: (farms) => SizedBox(
-                  width: 220,
-                  child: DropdownButtonFormField<String?>(
-                    value: filter.farmId ?? selectedFarmId,
-                    decoration: const InputDecoration(labelText: 'Fazenda'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Todas'),
-                      ),
-                      ...farms.map(
-                        (farm) => DropdownMenuItem<String?>(
-                          value: farm.metadata.id,
-                          child: Text(farm.name),
+          AppSearchBar(hintText: 'Filtre as operações', onChanged: (_) {}),
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: FieldOperationsStatusScope.values
+                    .map(
+                      (scope) => Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.xs),
+                        child: _StatusScopeChip(
+                          scope: scope,
+                          selected: filter.statusScope == scope,
+                          onTap: () {
+                            ref
+                                .read(fieldOperationsFilterProvider.notifier)
+                                .state = filter.copyWith(
+                              statusScope: scope,
+                            );
+                          },
                         ),
                       ),
-                    ],
-                    onChanged: (value) {
-                      ref.read(fieldOperationsFilterProvider.notifier).state =
-                          filter.copyWith(farmId: value);
-                    },
-                  ),
-                ),
-                orElse: SizedBox.shrink,
+                    )
+                    .toList(),
               ),
-              SizedBox(
-                width: 180,
-                child: AppDropdownField<FieldOperationStatus?>(
-                  label: 'Status',
-                  value: filter.status,
-                  items: [
-                    const DropdownMenuItem<FieldOperationStatus?>(
-                      value: null,
-                      child: Text('Todos'),
-                    ),
-                    ...FieldOperationStatus.values.map(
-                      (status) => DropdownMenuItem<FieldOperationStatus?>(
-                        value: status,
-                        child: Text(status.label),
-                      ),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    ref.read(fieldOperationsFilterProvider.notifier).state =
-                        filter.copyWith(status: value);
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
@@ -142,9 +114,15 @@ class FieldOperationsPage extends ConsumerWidget {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, operation, _) {
+                    final rawFieldIds = operation.fieldIds.isNotEmpty
+                        ? operation.fieldIds
+                        : operation.fields.map((field) => field.fieldId);
+                    final names = rawFieldIds
+                        .map((id) => fieldNameById[id] ?? id)
+                        .toList();
                     return _FieldOperationTile(
                       operation: operation,
-                      fieldName: fieldNameById[operation.fieldId],
+                      fieldNames: names,
                       onTap: () => showAppFormSheet<void>(
                         context: context,
                         child: operation.status == FieldOperationStatus.open
@@ -172,30 +150,48 @@ class FieldOperationsPage extends ConsumerWidget {
 class _FieldOperationTile extends StatelessWidget {
   const _FieldOperationTile({
     required this.operation,
-    this.fieldName,
+    required this.fieldNames,
     this.onTap,
   });
 
   final FieldOperation operation;
-  final String? fieldName;
+  final List<String> fieldNames;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final statusVisual = _statusVisual(context, operation.status);
     return AppCard(
+      color: statusVisual.cardColor,
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         onTap: onTap,
-        leading: const CircleAvatar(child: Icon(Icons.agriculture_outlined)),
-        title: Text('Operação ${operation.metadata.id.substring(0, 8)}'),
+        leading: CircleAvatar(
+          backgroundColor: statusVisual.leadingBackgroundColor,
+          child: Icon(
+            Icons.agriculture_outlined,
+            color: statusVisual.leadingIconColor,
+          ),
+        ),
+        title: Text(_operationLabel(operation.sequenceNumber)),
         subtitle: Text(
-          'Talhão: ${fieldName ?? operation.fieldId}\nItens: ${operation.items.length}',
+          'Talhões: ${fieldNames.join(', ')}\nItens: ${operation.items.length}',
         ),
         isThreeLine: true,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Chip(label: Text(operation.status.label)),
+            Chip(
+              backgroundColor: statusVisual.chipBackgroundColor,
+              side: BorderSide(color: statusVisual.chipBorderColor),
+              label: Text(
+                operation.status.label,
+                style: TextStyle(
+                  color: statusVisual.chipForegroundColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             if (onTap != null) ...[
               const SizedBox(width: AppSpacing.xs),
               const Icon(Icons.chevron_right_rounded),
@@ -205,6 +201,179 @@ class _FieldOperationTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StatusScopeChip extends StatelessWidget {
+  const _StatusScopeChip({
+    required this.scope,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final FieldOperationsStatusScope scope;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final visual = _statusScopeVisual(scope);
+    final selectedBackground = visual.selectedBackground;
+    final idleBackground = Theme.of(context).colorScheme.surface;
+    final selectedBorder = visual.selectedBorder;
+    final idleBorder = selectedBorder.withValues(alpha: 0.42);
+    final textColor = selected
+        ? visual.selectedText
+        : Theme.of(context).colorScheme.onSurfaceVariant;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            color: selected ? selectedBackground : idleBackground,
+            border: Border.all(
+              color: selected ? selectedBorder : idleBorder,
+              width: selected ? 1.4 : 1,
+            ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: selectedBorder.withValues(alpha: 0.18),
+                      blurRadius: 14,
+                      offset: const Offset(0, 5),
+                    ),
+                  ]
+                : const [],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? selectedBorder : idleBorder,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                scope.compactLabel,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _operationLabel(int? sequenceNumber) {
+  if (sequenceNumber == null) {
+    return 'Operação';
+  }
+  return 'Operação #$sequenceNumber';
+}
+
+_StatusScopeVisual _statusScopeVisual(FieldOperationsStatusScope scope) {
+  return switch (scope) {
+    FieldOperationsStatusScope.openAndFinished => const _StatusScopeVisual(
+      selectedBackground: Color(0xFFE9F3EC),
+      selectedBorder: Color(0xFF6F9C80),
+      selectedText: Color(0xFF2F6F4F),
+    ),
+    FieldOperationsStatusScope.open => const _StatusScopeVisual(
+      selectedBackground: Color(0xFFFFF1D7),
+      selectedBorder: Color(0xFFE0A238),
+      selectedText: Color(0xFF8A5200),
+    ),
+    FieldOperationsStatusScope.finished => const _StatusScopeVisual(
+      selectedBackground: Color(0xFFDEF3E3),
+      selectedBorder: Color(0xFF5BA26D),
+      selectedText: Color(0xFF1F6A3D),
+    ),
+    FieldOperationsStatusScope.canceled => const _StatusScopeVisual(
+      selectedBackground: Color(0xFFFBE8E8),
+      selectedBorder: Color(0xFFE39A9A),
+      selectedText: Color(0xFFA14646),
+    ),
+  };
+}
+
+_OperationStatusVisual _statusVisual(
+  BuildContext context,
+  FieldOperationStatus status,
+) {
+  final scheme = Theme.of(context).colorScheme;
+  return switch (status) {
+    FieldOperationStatus.open => _OperationStatusVisual(
+      chipBackgroundColor: const Color(0xFFFFF5E6),
+      chipBorderColor: const Color(0xFFE6A23C),
+      chipForegroundColor: const Color(0xFF8A5200),
+      leadingBackgroundColor: const Color(0xFFFFE8BF),
+      leadingIconColor: const Color(0xFF8A5200),
+      cardColor: const Color(0xFFFFFBF4),
+    ),
+    FieldOperationStatus.finished => _OperationStatusVisual(
+      chipBackgroundColor: scheme.primaryContainer.withValues(alpha: 0.65),
+      chipBorderColor: scheme.primary.withValues(alpha: 0.35),
+      chipForegroundColor: scheme.primary,
+      leadingBackgroundColor: scheme.primaryContainer.withValues(alpha: 0.95),
+      leadingIconColor: scheme.primary,
+      cardColor: scheme.primaryContainer.withValues(alpha: 0.16),
+    ),
+    FieldOperationStatus.canceled => _OperationStatusVisual(
+      chipBackgroundColor: const Color(0xFFFEECEC),
+      chipBorderColor: const Color(0xFFE67C7C),
+      chipForegroundColor: const Color(0xFF9F3030),
+      leadingBackgroundColor: const Color(0xFFFBD6D6),
+      leadingIconColor: const Color(0xFF9F3030),
+      cardColor: const Color(0xFFFFF8F8),
+    ),
+  };
+}
+
+class _OperationStatusVisual {
+  const _OperationStatusVisual({
+    required this.chipBackgroundColor,
+    required this.chipBorderColor,
+    required this.chipForegroundColor,
+    required this.leadingBackgroundColor,
+    required this.leadingIconColor,
+    required this.cardColor,
+  });
+
+  final Color chipBackgroundColor;
+  final Color chipBorderColor;
+  final Color chipForegroundColor;
+  final Color leadingBackgroundColor;
+  final Color leadingIconColor;
+  final Color cardColor;
+}
+
+class _StatusScopeVisual {
+  const _StatusScopeVisual({
+    required this.selectedBackground,
+    required this.selectedBorder,
+    required this.selectedText,
+  });
+
+  final Color selectedBackground;
+  final Color selectedBorder;
+  final Color selectedText;
 }
 
 class CreateFieldOperationPage extends ConsumerStatefulWidget {
@@ -221,15 +390,17 @@ class _CreateFieldOperationPageState
     extends ConsumerState<CreateFieldOperationPage> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  final List<_OperationItemDraft> _items = [_OperationItemDraft()];
+  final List<_OperationItemDraft> _items = [];
+  int _nextItemOrder = 1;
   String? _farmId;
-  String? _fieldId;
+  final Set<String> _fieldIds = <String>{};
   String? _inventoryLocationId;
 
   @override
   void initState() {
     super.initState();
     _farmId = ref.read(sessionManagerProvider).selectedFarmId;
+    _items.add(_OperationItemDraft(order: _nextItemOrder++));
   }
 
   @override
@@ -326,7 +497,7 @@ class _CreateFieldOperationPageState
                     onChanged: (value) {
                       setState(() {
                         _farmId = value;
-                        _fieldId = null;
+                        _fieldIds.clear();
                         _inventoryLocationId = null;
                       });
                     },
@@ -338,25 +509,59 @@ class _CreateFieldOperationPageState
                 ),
                 const SizedBox(height: AppSpacing.md),
                 fieldsAsync.when(
-                  data: (fields) => AppDropdownField<String>(
-                    label: 'Talhão',
-                    value: _fieldId,
-                    enabled: _farmId != null,
-                    items: fields
-                        .map(
-                          (field) => DropdownMenuItem<String>(
-                            value: field.metadata.id,
-                            child: Text(field.name),
+                  data: (fields) => FormField<Set<String>>(
+                    initialValue: _fieldIds,
+                    validator: (_) => _fieldIds.isEmpty
+                        ? 'Selecione ao menos um talhão.'
+                        : null,
+                    builder: (field) => InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Talhões',
+                        errorText: field.errorText,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: AppSpacing.xs,
+                            runSpacing: AppSpacing.xs,
+                            children: _fieldIds.isEmpty
+                                ? const [Text('Nenhum talhão selecionado')]
+                                : fields
+                                      .where(
+                                        (item) => _fieldIds.contains(
+                                          item.metadata.id,
+                                        ),
+                                      )
+                                      .map(
+                                        (item) => Chip(label: Text(item.name)),
+                                      )
+                                      .toList(),
                           ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (_farmId != null) {
-                        setState(() => _fieldId = value);
-                      }
-                    },
-                    validator: (value) =>
-                        value == null ? 'Selecione o talhão.' : null,
+                          const SizedBox(height: AppSpacing.sm),
+                          ...fields.map(
+                            (item) => CheckboxListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              value: _fieldIds.contains(item.metadata.id),
+                              title: Text(item.name),
+                              onChanged: _farmId == null
+                                  ? null
+                                  : (selected) {
+                                      setState(() {
+                                        if (selected == true) {
+                                          _fieldIds.add(item.metadata.id);
+                                        } else {
+                                          _fieldIds.remove(item.metadata.id);
+                                        }
+                                        field.didChange(_fieldIds);
+                                      });
+                                    },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   loading: () => const AppFieldLoading(),
                   error: (_, __) => const Text('Falha ao carregar talhões.'),
@@ -366,7 +571,7 @@ class _CreateFieldOperationPageState
                   data: (locations) => AppDropdownField<String>(
                     label: 'Local de estoque',
                     value: _inventoryLocationId,
-                    enabled: _fieldId != null,
+                    enabled: _fieldIds.isNotEmpty,
                     items: locations
                         .map(
                           (location) => DropdownMenuItem<String>(
@@ -376,7 +581,7 @@ class _CreateFieldOperationPageState
                         )
                         .toList(),
                     onChanged: (value) {
-                      if (_fieldId != null) {
+                      if (_fieldIds.isNotEmpty) {
                         setState(() {
                           _inventoryLocationId = value;
                           for (final item in _items) {
@@ -411,8 +616,12 @@ class _CreateFieldOperationPageState
                     ),
                     const Spacer(),
                     IconButton.filledTonal(
-                      onPressed: () =>
-                          setState(() => _items.add(_OperationItemDraft())),
+                      onPressed: () => setState(
+                        () => _items.insert(
+                          0,
+                          _OperationItemDraft(order: _nextItemOrder++),
+                        ),
+                      ),
                       icon: const Icon(Icons.add_rounded),
                     ),
                   ],
@@ -427,7 +636,7 @@ class _CreateFieldOperationPageState
                   ),
                 for (var i = 0; i < _items.length; i++) ...[
                   _OperationItemCard(
-                    index: i,
+                    label: _items[i].order,
                     draft: _items[i],
                     enabled: _inventoryLocationId != null,
                     availableByProduct: adjustedAvailableByProduct,
@@ -435,6 +644,16 @@ class _CreateFieldOperationPageState
                     onOpenProductPicker: _inventoryLocationId == null
                         ? null
                         : () async {
+                            final withStockCount = adjustedAvailableByProduct
+                                .values
+                                .where((value) => value > 0)
+                                .length;
+                            debugPrint(
+                              '[CreateFieldOperationPage] abrir busca de produtos '
+                              'farmId=$_farmId inventoryLocationId=$_inventoryLocationId '
+                              'availableMapSize=${adjustedAvailableByProduct.length} '
+                              'withPositiveStock=$withStockCount',
+                            );
                             final selected =
                                 await showModalBottomSheet<Product>(
                                   context: context,
@@ -462,12 +681,7 @@ class _CreateFieldOperationPageState
                           },
                     onRemove: _items.length == 1
                         ? null
-                        : () {
-                            setState(() {
-                              _items[i].dispose();
-                              _items.removeAt(i);
-                            });
-                          },
+                        : () => _confirmAndRemoveItem(i),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                 ],
@@ -507,8 +721,8 @@ class _CreateFieldOperationPageState
       return;
     }
 
-    if (_fieldId == null) {
-      _showValidationError('Selecione o talhão.');
+    if (_fieldIds.isEmpty) {
+      _showValidationError('Selecione ao menos um talhão.');
       return;
     }
 
@@ -537,7 +751,7 @@ class _CreateFieldOperationPageState
         .submit(
           CreateFieldOperationInput(
             farmId: _farmId!,
-            fieldId: _fieldId!,
+            fieldIds: _fieldIds.toList(),
             operationDate: operationDate,
             status: FieldOperationStatus.open,
             description: _descriptionController.text.trim().isEmpty
@@ -550,6 +764,31 @@ class _CreateFieldOperationPageState
         );
   }
 
+  Future<void> _confirmAndRemoveItem(int index) async {
+    final confirmed = await showAppConfirmationDialog(
+      context,
+      title: 'Excluir item',
+      message: 'Deseja realmente excluir este item da operação?',
+      confirmLabel: 'Excluir',
+    );
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    setState(() {
+      _items[index].dispose();
+      _items.removeAt(index);
+      _reindexItemOrders();
+      _nextItemOrder = _items.length + 1;
+    });
+  }
+
+  void _reindexItemOrders() {
+    for (var i = 0; i < _items.length; i++) {
+      _items[i].order = i + 1;
+    }
+  }
+
   void _showValidationError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.red),
@@ -559,7 +798,7 @@ class _CreateFieldOperationPageState
 
 class _OperationItemCard extends StatelessWidget {
   const _OperationItemCard({
-    required this.index,
+    required this.label,
     required this.draft,
     required this.enabled,
     required this.availableByProduct,
@@ -568,7 +807,7 @@ class _OperationItemCard extends StatelessWidget {
     this.onRemove,
   });
 
-  final int index;
+  final int label;
   final _OperationItemDraft draft;
   final bool enabled;
   final Map<String, double> availableByProduct;
@@ -592,7 +831,7 @@ class _OperationItemCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                'Item ${index + 1}',
+                'Item $label',
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -703,6 +942,9 @@ class _OperationItemCard extends StatelessWidget {
 }
 
 class _OperationItemDraft {
+  _OperationItemDraft({required this.order});
+
+  int order;
   String? productId;
   String? productName;
   final quantitySentController = TextEditingController();

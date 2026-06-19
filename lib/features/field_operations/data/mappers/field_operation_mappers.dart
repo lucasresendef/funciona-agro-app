@@ -4,6 +4,10 @@ import 'package:field_management_app/features/field_operations/domain/entities/f
 
 extension FieldOperationDtoMapper on FieldOperationDto {
   FieldOperation toEntity() {
+    final resolvedFieldIds = fieldIds.isNotEmpty
+        ? fieldIds
+        : fields.map((field) => field.fieldId).toList();
+
     return FieldOperation(
       metadata: buildAuditMetadata(
         id: id,
@@ -15,8 +19,10 @@ extension FieldOperationDtoMapper on FieldOperationDto {
         updatedBy: updatedBy,
         updatedByEmail: updatedByEmail,
       ),
+      sequenceNumber: sequenceNumber,
       farmId: farmId,
-      fieldId: fieldId,
+      fieldIds: resolvedFieldIds,
+      fields: fields.map((field) => field.toEntity()).toList(),
       operationDate: operationDate,
       status: status,
       description: description,
@@ -24,6 +30,16 @@ extension FieldOperationDtoMapper on FieldOperationDto {
       startedAt: startedAt,
       finishedAt: finishedAt,
       items: items.map((item) => item.toEntity()).toList(),
+    );
+  }
+}
+
+extension FieldOperationFieldRefDtoMapper on FieldOperationFieldRefDto {
+  FieldOperationFieldRef toEntity() {
+    return FieldOperationFieldRef(
+      fieldId: fieldId,
+      name: name,
+      areaHectares: areaHectares,
     );
   }
 }
@@ -51,6 +67,19 @@ extension FieldOperationItemDtoMapper on FieldOperationItemDto {
       unitCostAtOperation: unitCostAtOperation,
       totalCostConsumed: totalCostConsumed,
       notes: notes,
+      fieldResults: fieldResults.map((result) => result.toEntity()).toList(),
+    );
+  }
+}
+
+extension FieldOperationItemFieldResultDtoMapper
+    on FieldOperationItemFieldResultDto {
+  FieldOperationItemFieldResult toEntity() {
+    return FieldOperationItemFieldResult(
+      fieldId: fieldId,
+      fieldName: fieldName,
+      allocatedQuantityConsumed: allocatedQuantityConsumed,
+      allocatedCostConsumed: allocatedCostConsumed,
     );
   }
 }
@@ -59,7 +88,7 @@ extension CreateFieldOperationInputMapper on CreateFieldOperationInput {
   CreateFieldOperationRequestDto toRequest() {
     return CreateFieldOperationRequestDto(
       farmId: farmId,
-      fieldId: fieldId,
+      fieldIds: fieldIds,
       operationDate: operationDate,
       status: status,
       description: description,

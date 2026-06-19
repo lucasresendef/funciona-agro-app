@@ -8,29 +8,57 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:field_management_app/core/utils/debug_log.dart';
 
+enum FieldOperationsStatusScope { openAndFinished, open, finished, canceled }
+
+extension FieldOperationsStatusScopeX on FieldOperationsStatusScope {
+  String get label => switch (this) {
+    FieldOperationsStatusScope.openAndFinished => 'Abertas e finalizadas',
+    FieldOperationsStatusScope.open => 'Abertas',
+    FieldOperationsStatusScope.finished => 'Finalizadas',
+    FieldOperationsStatusScope.canceled => 'Canceladas',
+  };
+
+  String get compactLabel => switch (this) {
+    FieldOperationsStatusScope.openAndFinished => 'Abertas + finalizadas',
+    FieldOperationsStatusScope.open => 'Abertas',
+    FieldOperationsStatusScope.finished => 'Finalizadas',
+    FieldOperationsStatusScope.canceled => 'Canceladas',
+  };
+
+  List<FieldOperationStatus> get statuses => switch (this) {
+    FieldOperationsStatusScope.openAndFinished => [
+      FieldOperationStatus.open,
+      FieldOperationStatus.finished,
+    ],
+    FieldOperationsStatusScope.open => [FieldOperationStatus.open],
+    FieldOperationsStatusScope.finished => [FieldOperationStatus.finished],
+    FieldOperationsStatusScope.canceled => [FieldOperationStatus.canceled],
+  };
+}
+
 class FieldOperationsFilter {
   const FieldOperationsFilter({
     this.farmId,
     this.fieldId,
-    this.status,
+    this.statusScope = FieldOperationsStatusScope.openAndFinished,
     this.active = true,
   });
 
   final String? farmId;
   final String? fieldId;
-  final FieldOperationStatus? status;
+  final FieldOperationsStatusScope statusScope;
   final bool? active;
 
   FieldOperationsFilter copyWith({
     String? farmId,
     String? fieldId,
-    FieldOperationStatus? status,
+    FieldOperationsStatusScope? statusScope,
     bool? active,
   }) {
     return FieldOperationsFilter(
       farmId: farmId ?? this.farmId,
       fieldId: fieldId ?? this.fieldId,
-      status: status ?? this.status,
+      statusScope: statusScope ?? this.statusScope,
       active: active ?? this.active,
     );
   }
@@ -39,7 +67,7 @@ class FieldOperationsFilter {
 final fieldOperationsFilterProvider = StateProvider<FieldOperationsFilter>((
   ref,
 ) {
-  return const FieldOperationsFilter(status: FieldOperationStatus.open);
+  return const FieldOperationsFilter();
 });
 
 final fieldOperationsInfiniteListProvider =
@@ -60,7 +88,7 @@ final fieldOperationsProvider = FutureProvider<List<FieldOperation>>((
   return useCase.call(
     farmId: filter.farmId ?? selectedFarmId,
     fieldId: filter.fieldId,
-    status: filter.status,
+    status: filter.statusScope.statuses.first,
     active: filter.active,
   );
 });
@@ -68,6 +96,7 @@ final fieldOperationsProvider = FutureProvider<List<FieldOperation>>((
 class FieldOperationsInfiniteListController
     extends AsyncNotifier<InfiniteListState<FieldOperation>> {
   static const _pageSize = 20;
+  List<FieldOperation> _mixedStatusCache = const <FieldOperation>[];
 
   @override
   Future<InfiniteListState<FieldOperation>> build() async {
@@ -100,12 +129,19 @@ class FieldOperationsInfiniteListController
     );
 
     try {
+      if (filter.statusScope.statuses.length > 1) {
+        state = AsyncData(
+          _loadNextFromCache(current: current, cache: _mixedStatusCache),
+        );
+        return;
+      }
+
       final page = await useCase.page(
         page: current.page + 1,
         limit: _pageSize,
         farmId: filter.farmId ?? selectedFarmId,
         fieldId: filter.fieldId,
-        status: filter.status,
+        status: filter.statusScope.statuses.first,
         active: filter.active,
       );
 
@@ -135,12 +171,41 @@ class FieldOperationsInfiniteListController
     final useCase = GetFieldOperationsUseCase(
       ref.read(fieldOperationsRepositoryProvider),
     );
+
+    if (filter.statusScope.statuses.length > 1) {
+      final responses = await Future.wait(
+        filter.statusScope.statuses
+            .map(
+              (status) => useCase.call(
+                farmId: filter.farmId ?? selectedFarmId,
+                fieldId: filter.fieldId,
+                status: status,
+                active: filter.active,
+              ),
+            )
+            .toList(),
+      );
+
+      _mixedStatusCache = _mergeAndSortOperations(
+        responses.expand((items) => items).toList(),
+      );
+      final firstSliceEnd = _mixedStatusCache.length > _pageSize
+          ? _pageSize
+          : _mixedStatusCache.length;
+      return InfiniteListState<FieldOperation>(
+        items: _mixedStatusCache.sublist(0, firstSliceEnd),
+        page: firstSliceEnd == 0 ? 0 : 1,
+        hasNextPage: firstSliceEnd < _mixedStatusCache.length,
+      );
+    }
+
+    _mixedStatusCache = const <FieldOperation>[];
     final page = await useCase.page(
       page: 1,
       limit: _pageSize,
       farmId: filter.farmId ?? selectedFarmId,
       fieldId: filter.fieldId,
-      status: filter.status,
+      status: filter.statusScope.statuses.first,
       active: filter.active,
     );
 
@@ -149,6 +214,54 @@ class FieldOperationsInfiniteListController
       page: page.page,
       hasNextPage: page.hasNextPage,
     );
+  }
+
+  InfiniteListState<FieldOperation> _loadNextFromCache({
+    required InfiniteListState<FieldOperation> current,
+    required List<FieldOperation> cache,
+  }) {
+    final nextPage = current.page + 1;
+    final from = (nextPage - 1) * _pageSize;
+    if (from >= cache.length) {
+      return current.copyWith(isLoadingMore: false, hasNextPage: false);
+    }
+
+    final to = from + _pageSize > cache.length
+        ? cache.length
+        : from + _pageSize;
+    return current.copyWith(
+      items: [...current.items, ...cache.sublist(from, to)],
+      page: nextPage,
+      hasNextPage: to < cache.length,
+      isLoadingMore: false,
+    );
+  }
+
+  List<FieldOperation> _mergeAndSortOperations(
+    List<FieldOperation> operations,
+  ) {
+    final mapById = <String, FieldOperation>{
+      for (final item in operations) item.metadata.id: item,
+    };
+    final merged = mapById.values.toList();
+    merged.sort((a, b) {
+      final operationDateComparison = b.operationDate.compareTo(
+        a.operationDate,
+      );
+      if (operationDateComparison != 0) {
+        return operationDateComparison;
+      }
+      final createdAtA = a.metadata.createdAt;
+      final createdAtB = b.metadata.createdAt;
+      if (createdAtA != null && createdAtB != null) {
+        final createdComparison = createdAtB.compareTo(createdAtA);
+        if (createdComparison != 0) {
+          return createdComparison;
+        }
+      }
+      return (b.sequenceNumber ?? 0).compareTo(a.sequenceNumber ?? 0);
+    });
+    return merged;
   }
 }
 

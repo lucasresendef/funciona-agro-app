@@ -1,15 +1,16 @@
+import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/storage/session_manager.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
 import 'package:field_management_app/core/utils/formatters.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_destructive.dart';
+import 'package:field_management_app/design_system/components/app_detail_dialog.dart';
 import 'package:field_management_app/design_system/components/app_form_actions.dart';
 import 'package:field_management_app/design_system/components/app_form_sheet.dart';
 import 'package:field_management_app/design_system/components/app_page.dart';
 import 'package:field_management_app/design_system/components/app_search_bar.dart';
 import 'package:field_management_app/design_system/components/async_state_views.dart';
 import 'package:field_management_app/design_system/components/infinite_scroll_list_view.dart';
-import 'package:field_management_app/design_system/foundations/app_layout.dart';
 import 'package:field_management_app/design_system/foundations/app_spacing.dart';
 import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
 import 'package:field_management_app/features/fields/domain/entities/field.dart';
@@ -27,21 +28,21 @@ class FieldsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fieldsAsync = ref.watch(fieldsInfiniteListProvider);
-    final farmsAsync = ref.watch(allActiveFarmsProvider);
     final filter = ref.watch(fieldsFilterProvider);
-    final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
+    final isAdmin = ref.watch(isAdminProvider);
 
     return AppPage(
       title: 'Talhões',
       actions: [
-        IconButton.filled(
-          tooltip: 'Novo talhão',
-          onPressed: () => showAppFormSheet<void>(
-            context: context,
-            child: const CreateFieldPage(),
+        if (isAdmin)
+          IconButton.filled(
+            tooltip: 'Novo talhão',
+            onPressed: () => showAppFormSheet<void>(
+              context: context,
+              child: const CreateFieldPage(),
+            ),
+            icon: const Icon(Icons.add_rounded),
           ),
-          icon: const Icon(Icons.add_rounded),
-        ),
       ],
       child: Column(
         children: [
@@ -54,32 +55,6 @@ class FieldsPage extends ConsumerWidget {
               );
             },
             trailing: [
-              SizedBox(
-                width: AppLayout.formFieldWidth(context, 260),
-                child: farmsAsync.maybeWhen(
-                  data: (farms) => DropdownButtonFormField<String?>(
-                    value: filter.farmId ?? selectedFarmId,
-                    decoration: const InputDecoration(labelText: 'Fazenda'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Todas'),
-                      ),
-                      ...farms.map(
-                        (farm) => DropdownMenuItem<String?>(
-                          value: farm.metadata.id,
-                          child: Text(farm.name),
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      ref.read(fieldsFilterProvider.notifier).state = filter
-                          .copyWith(farmId: value);
-                    },
-                  ),
-                  orElse: SizedBox.shrink,
-                ),
-              ),
               FilterChip(
                 label: const Text('Somente ativos'),
                 selected: filter.active ?? false,
@@ -115,6 +90,7 @@ class FieldsPage extends ConsumerWidget {
                   itemBuilder: (context, field, _) {
                     return _FieldTile(
                       field: field,
+                      canManage: isAdmin,
                       onEdit: () => _showEditFieldDialog(context, field),
                       onDelete: () => _confirmDeleteField(context, ref, field),
                     );
@@ -172,11 +148,13 @@ class FieldsPage extends ConsumerWidget {
 class _FieldTile extends StatelessWidget {
   const _FieldTile({
     required this.field,
+    required this.canManage,
     required this.onEdit,
     required this.onDelete,
   });
 
   final Field field;
+  final bool canManage;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -184,7 +162,7 @@ class _FieldTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       child: ListTile(
-        onTap: () => _showFieldDetailsSheet(context, field, onEdit, onDelete),
+        onTap: () => _showFieldDetailsSheet(context, field, canManage, onEdit, onDelete),
         contentPadding: EdgeInsets.zero,
         leading: const CircleAvatar(child: Icon(Icons.grid_view_rounded)),
         title: Text(field.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -205,82 +183,37 @@ class _FieldTile extends StatelessWidget {
 void _showFieldDetailsSheet(
   BuildContext context,
   Field field,
+  bool canManage,
   VoidCallback onEdit,
   VoidCallback onDelete,
 ) {
-  showModalBottomSheet<void>(
+  showAppDetailDialog<void>(
     context: context,
-    showDragHandle: true,
-    useSafeArea: true,
-    builder: (context) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md,
-          AppSpacing.sm,
-          AppSpacing.md,
-          AppSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    title: field.name,
+    canManage: canManage,
+    onEdit: onEdit,
+    onDelete: onDelete,
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
           children: [
-            Text(
-              field.name,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.xs,
-              children: [
-                Chip(label: Text(field.metadata.active ? 'Ativo' : 'Inativo')),
-                Chip(
-                  label: Text(
-                    'Área: ${AppFormatters.number(field.areaHectares)} ha',
-                  ),
-                ),
-              ],
-            ),
-            if (field.description != null && field.description!.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.sm),
-              Text(field.description!),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onEdit();
-                    },
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Editar'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onDelete();
-                    },
-                    style: AppDestructive.outlinedStyle(context),
-                    icon: Icon(
-                      Icons.delete_outline,
-                      color: AppDestructive.iconColor(context),
-                    ),
-                    label: const Text('Excluir'),
-                  ),
-                ),
-              ],
+            Chip(
+              label: Text(
+                'Área: ${AppFormatters.number(field.areaHectares)} ha',
+              ),
             ),
           ],
         ),
-      );
-    },
+        if (field.description != null && field.description!.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(field.description!),
+        ],
+      ],
+    ),
   );
 }
 

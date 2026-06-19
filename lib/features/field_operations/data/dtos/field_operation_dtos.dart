@@ -68,6 +68,7 @@ class OptionalDoubleConverter implements JsonConverter<double?, dynamic> {
 abstract class FieldOperationDto with _$FieldOperationDto {
   const factory FieldOperationDto({
     required String id,
+    int? sequenceNumber,
     required bool active,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -76,7 +77,9 @@ abstract class FieldOperationDto with _$FieldOperationDto {
     String? updatedBy,
     String? updatedByEmail,
     required String farmId,
-    required String fieldId,
+    @Default(<String>[]) List<String> fieldIds,
+    @Default(<FieldOperationFieldRefDto>[])
+    List<FieldOperationFieldRefDto> fields,
     required DateTime operationDate,
     required FieldOperationStatus status,
     String? description,
@@ -88,6 +91,18 @@ abstract class FieldOperationDto with _$FieldOperationDto {
 
   factory FieldOperationDto.fromJson(Map<String, dynamic> json) =>
       _$FieldOperationDtoFromJson(json);
+}
+
+@freezed
+abstract class FieldOperationFieldRefDto with _$FieldOperationFieldRefDto {
+  const factory FieldOperationFieldRefDto({
+    required String fieldId,
+    String? name,
+    @OptionalDoubleConverter() double? areaHectares,
+  }) = _FieldOperationFieldRefDto;
+
+  factory FieldOperationFieldRefDto.fromJson(Map<String, dynamic> json) =>
+      _$FieldOperationFieldRefDtoFromJson(json);
 }
 
 @freezed
@@ -109,6 +124,8 @@ abstract class FieldOperationItemDto with _$FieldOperationItemDto {
     @DoubleConverter() required double unitCostAtOperation,
     @OptionalDoubleConverter() double? totalCostConsumed,
     String? notes,
+    @Default(<FieldOperationItemFieldResultDto>[])
+    List<FieldOperationItemFieldResultDto> fieldResults,
   }) = _FieldOperationItemDto;
 
   factory FieldOperationItemDto.fromJson(Map<String, dynamic> json) =>
@@ -116,11 +133,26 @@ abstract class FieldOperationItemDto with _$FieldOperationItemDto {
 }
 
 @freezed
+abstract class FieldOperationItemFieldResultDto
+    with _$FieldOperationItemFieldResultDto {
+  const factory FieldOperationItemFieldResultDto({
+    required String fieldId,
+    String? fieldName,
+    @OptionalDoubleConverter() double? allocatedQuantityConsumed,
+    @OptionalDoubleConverter() double? allocatedCostConsumed,
+  }) = _FieldOperationItemFieldResultDto;
+
+  factory FieldOperationItemFieldResultDto.fromJson(
+    Map<String, dynamic> json,
+  ) => _$FieldOperationItemFieldResultDtoFromJson(json);
+}
+
+@freezed
 abstract class CreateFieldOperationRequestDto
     with _$CreateFieldOperationRequestDto {
   const factory CreateFieldOperationRequestDto({
     required String farmId,
-    required String fieldId,
+    @Default(<String>[]) List<String> fieldIds,
     required DateTime operationDate,
     @Default(FieldOperationStatus.open) FieldOperationStatus status,
     String? description,

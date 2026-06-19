@@ -4,6 +4,35 @@ import 'package:field_management_app/features/reports/domain/usecases/reports_us
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeReportsRepository implements ReportsRepository {
+  @override
+  Future<DashboardMetrics> getDashboardMetrics(
+    GetDashboardMetricsInput input,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<FieldConsumptionReport> getFieldConsumptionReport({
+    required String fieldId,
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    return FieldConsumptionReport(
+      fieldId: fieldId,
+      fieldName: 'Talhão',
+      farmId: 'farm',
+      farmName: 'Fazenda',
+      period: FieldConsumptionReportPeriod(from: from, to: to),
+      summary: const FieldConsumptionReportSummary(
+        totalAllocatedQuantityConsumed: 0,
+        totalAllocatedCostConsumed: 0,
+        operationCount: 0,
+        itemCount: 0,
+      ),
+      items: const [],
+    );
+  }
+
   _FakeReportsRepository(this._jobs);
 
   final List<ReportJob> _jobs;

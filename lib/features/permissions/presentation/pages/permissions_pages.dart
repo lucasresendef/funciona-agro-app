@@ -8,7 +8,6 @@ import 'package:field_management_app/design_system/components/app_page.dart';
 import 'package:field_management_app/design_system/components/app_search_bar.dart';
 import 'package:field_management_app/design_system/components/async_state_views.dart';
 import 'package:field_management_app/design_system/components/infinite_scroll_list_view.dart';
-import 'package:field_management_app/design_system/foundations/app_layout.dart';
 import 'package:field_management_app/design_system/foundations/app_spacing.dart';
 import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
 import 'package:field_management_app/features/permissions/domain/entities/farm_user_permission.dart';
@@ -27,7 +26,6 @@ class PermissionsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final permissionsAsync = ref.watch(permissionsInfiniteListProvider);
-    final farmsAsync = ref.watch(allActiveFarmsProvider);
     final filter = ref.watch(permissionsFilterProvider);
 
     return AppPage(
@@ -49,33 +47,7 @@ class PermissionsPage extends ConsumerWidget {
             onChanged: (_) {},
             trailing: [
               SizedBox(
-                width: AppLayout.formFieldWidth(context, 260),
-                child: farmsAsync.maybeWhen(
-                  data: (farms) => DropdownButtonFormField<String?>(
-                    value: filter.farmId,
-                    decoration: const InputDecoration(labelText: 'Fazenda'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Todas'),
-                      ),
-                      ...farms.map(
-                        (farm) => DropdownMenuItem<String?>(
-                          value: farm.metadata.id,
-                          child: Text(farm.name),
-                        ),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      ref.read(permissionsFilterProvider.notifier).state =
-                          filter.copyWith(farmId: value);
-                    },
-                  ),
-                  orElse: SizedBox.shrink,
-                ),
-              ),
-              SizedBox(
-                width: AppLayout.formFieldWidth(context, 220),
+                width: double.infinity,
                 child: AppDropdownField<FarmUserRole?>(
                   label: 'Papel',
                   value: filter.role,

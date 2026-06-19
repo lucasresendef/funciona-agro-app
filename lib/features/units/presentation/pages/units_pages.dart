@@ -1,3 +1,4 @@
+import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
 import 'package:field_management_app/design_system/components/app_action_button.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
@@ -25,18 +26,20 @@ class UnitsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final unitsAsync = ref.watch(unitsInfiniteListProvider);
     final filter = ref.watch(unitsFilterProvider);
+    final isAdmin = ref.watch(isAdminProvider);
 
     return AppPage(
       title: 'Unidades',
       actions: [
-        IconButton.filled(
-          tooltip: 'Nova unidade',
-          onPressed: () => showAppFormSheet<void>(
-            context: context,
-            child: const CreateUnitPage(),
+        if (isAdmin)
+          IconButton.filled(
+            tooltip: 'Nova unidade',
+            onPressed: () => showAppFormSheet<void>(
+              context: context,
+              child: const CreateUnitPage(),
+            ),
+            icon: const Icon(Icons.add_rounded),
           ),
-          icon: const Icon(Icons.add_rounded),
-        ),
       ],
       child: Column(
         children: [
@@ -87,32 +90,36 @@ class UnitsPage extends ConsumerWidget {
                         contentPadding: EdgeInsets.zero,
                         title: Text(unit.name),
                         subtitle: Text('Símbolo: ${unit.symbol}'),
-                        trailing: Wrap(
-                          spacing: AppSpacing.xs,
-                          children: [
-                            IconButton(
-                              tooltip: 'Editar',
-                              onPressed: () => showAppFormSheet<void>(
-                                context: context,
-                                child: EditUnitPage(unit: unit),
-                              ),
-                              icon: const Icon(Icons.edit_outlined),
-                            ),
-                            IconButton(
-                              tooltip: 'Excluir',
-                              style: AppDestructive.iconButtonStyle(context),
-                              onPressed: () => _confirmDelete(
-                                context: context,
-                                ref: ref,
-                                unit: unit,
-                              ),
-                              icon: Icon(
-                                Icons.delete_outline,
-                                color: AppDestructive.iconColor(context),
-                              ),
-                            ),
-                          ],
-                        ),
+                        trailing: isAdmin
+                            ? Wrap(
+                                spacing: AppSpacing.xs,
+                                children: [
+                                  IconButton(
+                                    tooltip: 'Editar',
+                                    onPressed: () => showAppFormSheet<void>(
+                                      context: context,
+                                      child: EditUnitPage(unit: unit),
+                                    ),
+                                    icon: const Icon(Icons.edit_outlined),
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Excluir',
+                                    style: AppDestructive.iconButtonStyle(
+                                      context,
+                                    ),
+                                    onPressed: () => _confirmDelete(
+                                      context: context,
+                                      ref: ref,
+                                      unit: unit,
+                                    ),
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: AppDestructive.iconColor(context),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : null,
                       ),
                     );
                   },

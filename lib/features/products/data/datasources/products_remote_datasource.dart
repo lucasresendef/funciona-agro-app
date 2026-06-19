@@ -1,6 +1,7 @@
 import 'package:field_management_app/core/network/api_client.dart';
 import 'package:field_management_app/core/network/paginated_list_helper.dart';
 import 'package:field_management_app/features/products/data/dtos/product_dtos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final productsRemoteDataSourceProvider = Provider<ProductsRemoteDataSource>((
@@ -32,6 +33,11 @@ class ProductsRemoteDataSource {
         'search': search,
       },
     );
+    debugPrint(
+      '[ProductsRemoteDataSource.listPage] GET /products '
+      'query={page:$page,limit:$limit,active:$active,category:$category,search:$search} '
+      'responseMeta={page:${payload.page},limit:${payload.limit},total:${payload.total},items:${payload.data.length},hasNext:${payload.hasNextPage}}',
+    );
     return payload.map(ProductDto.fromJson);
   }
 
@@ -48,6 +54,11 @@ class ProductsRemoteDataSource {
         'category': category,
         'search': search,
       },
+    );
+    debugPrint(
+      '[ProductsRemoteDataSource.list] GET /products '
+      'query={active:$active,category:$category,search:$search} '
+      'responseItems=${payload.length}',
     );
 
     return payload.map(ProductDto.fromJson).toList();

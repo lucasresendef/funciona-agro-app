@@ -13,12 +13,26 @@ class ReportsUseCases {
 
   final ReportsRepository _repository;
 
+  Future<DashboardMetrics> getDashboardMetrics(GetDashboardMetricsInput input) {
+    return _repository.getDashboardMetrics(input);
+  }
+
   Future<ReportJobCreated> createInventoryMovementsCsvJob(
     CreateInventoryMovementsCsvJobInput input,
   ) => _repository.createInventoryMovementsCsvJob(input);
 
   Future<ReportJob> getReportJob(String jobId) =>
       _repository.getReportJob(jobId);
+
+  Future<FieldConsumptionReport> getFieldConsumptionReport({
+    required String fieldId,
+    required DateTime from,
+    required DateTime to,
+  }) => _repository.getFieldConsumptionReport(
+    fieldId: fieldId,
+    from: from,
+    to: to,
+  );
 
   Future<ReportJob> pollReportJobUntilFinalStatus(
     String jobId, {

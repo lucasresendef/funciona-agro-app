@@ -25,7 +25,8 @@ class ModuleCard extends StatelessWidget {
       onTap: onTap,
       child: AppCard(
         child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          height: double.infinity,
+          padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -49,7 +50,7 @@ class ModuleCard extends StatelessWidget {
                   color: theme.colorScheme.onSecondaryContainer,
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.md),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -68,12 +69,12 @@ class ModuleCard extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    maxLines: 6,
+                    maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const Spacer(),
               Row(
                 children: [
                   Text(
