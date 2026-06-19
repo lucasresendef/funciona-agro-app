@@ -29,7 +29,14 @@ class FieldsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fieldsAsync = ref.watch(fieldsInfiniteListProvider);
     final filter = ref.watch(fieldsFilterProvider);
+    final farmsAsync = ref.watch(allActiveFarmsProvider);
     final isAdmin = ref.watch(isAdminProvider);
+    final hasActiveFilters =
+        (filter.search?.trim().isNotEmpty ?? false) || filter.active != true;
+    final farmNameById = <String, String>{
+      for (final farm in farmsAsync.asData?.value ?? [])
+        farm.metadata.id: farm.name,
+    };
 
     return AppPage(
       title: 'Talhões',
@@ -49,6 +56,18 @@ class FieldsPage extends ConsumerWidget {
           AppSearchBar(
             initialValue: filter.search,
             hintText: 'Buscar por nome',
+            actions: [
+              IconButton.filledTonal(
+                tooltip: 'Limpar filtros',
+                onPressed: hasActiveFilters
+                    ? () {
+                        ref.read(fieldsFilterProvider.notifier).state =
+                            const FieldsFilter();
+                      }
+                    : null,
+                icon: const Icon(Icons.filter_alt_off_rounded),
+              ),
+            ],
             onChanged: (value) {
               ref.read(fieldsFilterProvider.notifier).state = filter.copyWith(
                 search: value,
@@ -70,15 +89,17 @@ class FieldsPage extends ConsumerWidget {
             child: fieldsAsync.when(
               data: (listState) {
                 final items = listState.items;
+                final entries = _buildFieldListEntries(items, farmNameById);
                 if (items.isEmpty) {
                   return const EmptyStateView(
                     title: 'Nenhum talhão encontrado',
-                    message: 'Selecione uma fazenda ou crie o primeiro talhão.',
+                    message:
+                        'Ajuste os filtros ou crie o primeiro talhão disponível.',
                   );
                 }
 
-                return InfiniteScrollListView<Field>(
-                  items: items,
+                return InfiniteScrollListView<_FieldListEntry>(
+                  items: entries,
                   isLoadingMore: listState.isLoadingMore,
                   onRefresh: () => ref
                       .read(fieldsInfiniteListProvider.notifier)
@@ -87,12 +108,32 @@ class FieldsPage extends ConsumerWidget {
                       ref.read(fieldsInfiniteListProvider.notifier).loadMore(),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, field, _) {
+                  itemBuilder: (context, entry, _) {
+                    if (entry is _FieldSectionHeader) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.xs,
+                          AppSpacing.sm,
+                          AppSpacing.xs,
+                          AppSpacing.xs,
+                        ),
+                        child: Text(
+                          entry.title,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      );
+                    }
+
+                    final item = entry as _FieldListItem;
+
                     return _FieldTile(
-                      field: field,
+                      field: item.field,
+                      farmName: farmNameById[item.field.farmId],
                       canManage: isAdmin,
-                      onEdit: () => _showEditFieldDialog(context, field),
-                      onDelete: () => _confirmDeleteField(context, ref, field),
+                      onEdit: () => _showEditFieldDialog(context, item.field),
+                      onDelete: () =>
+                          _confirmDeleteField(context, ref, item.field),
                     );
                   },
                 );
@@ -145,15 +186,51 @@ class FieldsPage extends ConsumerWidget {
   }
 }
 
+List<_FieldListEntry> _buildFieldListEntries(
+  List<Field> fields,
+  Map<String, String> farmNameById,
+) {
+  final groupedFields = <String, List<Field>>{};
+  for (final field in fields) {
+    final farmName = farmNameById[field.farmId] ?? 'Fazenda não identificada';
+    groupedFields.putIfAbsent(farmName, () => []).add(field);
+  }
+
+  final entries = <_FieldListEntry>[];
+  for (final entry in groupedFields.entries) {
+    entries.add(_FieldSectionHeader(entry.key));
+    entries.addAll(entry.value.map(_FieldListItem.new));
+  }
+  return entries;
+}
+
+sealed class _FieldListEntry {
+  const _FieldListEntry();
+}
+
+class _FieldSectionHeader extends _FieldListEntry {
+  const _FieldSectionHeader(this.title);
+
+  final String title;
+}
+
+class _FieldListItem extends _FieldListEntry {
+  const _FieldListItem(this.field);
+
+  final Field field;
+}
+
 class _FieldTile extends StatelessWidget {
   const _FieldTile({
     required this.field,
+    required this.farmName,
     required this.canManage,
     required this.onEdit,
     required this.onDelete,
   });
 
   final Field field;
+  final String? farmName;
   final bool canManage;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -162,7 +239,14 @@ class _FieldTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       child: ListTile(
-        onTap: () => _showFieldDetailsSheet(context, field, canManage, onEdit, onDelete),
+        onTap: () => _showFieldDetailsSheet(
+          context,
+          field,
+          farmName,
+          canManage,
+          onEdit,
+          onDelete,
+        ),
         contentPadding: EdgeInsets.zero,
         leading: const CircleAvatar(child: Icon(Icons.grid_view_rounded)),
         title: Text(field.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -171,6 +255,12 @@ class _FieldTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: AppSpacing.xs),
+            if (farmName != null && farmName!.isNotEmpty)
+              Text(
+                'Fazenda: $farmName',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             Text('Área: ${AppFormatters.number(field.areaHectares)} ha'),
           ],
         ),
@@ -183,6 +273,7 @@ class _FieldTile extends StatelessWidget {
 void _showFieldDetailsSheet(
   BuildContext context,
   Field field,
+  String? farmName,
   bool canManage,
   VoidCallback onEdit,
   VoidCallback onDelete,
@@ -201,6 +292,8 @@ void _showFieldDetailsSheet(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.xs,
           children: [
+            if (farmName != null && farmName.isNotEmpty)
+              Chip(label: Text('Fazenda: $farmName')),
             Chip(
               label: Text(
                 'Área: ${AppFormatters.number(field.areaHectares)} ha',

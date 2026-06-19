@@ -305,6 +305,19 @@ final inventoryBalancesByLocationProvider =
           .toList();
     });
 
+final inventoryBalancesByFarmProvider =
+    FutureProvider.family<List<InventoryBalance>, String?>((ref, farmId) async {
+      if (farmId == null) {
+        return const <InventoryBalance>[];
+      }
+
+      final useCase = GetInventoryBalancesUseCase(
+        ref.watch(inventoryRepositoryProvider),
+      );
+
+      return useCase.call(farmId: farmId, active: true);
+    });
+
 final createInventoryLocationControllerProvider =
     AsyncNotifierProvider<CreateInventoryLocationController, void>(
       CreateInventoryLocationController.new,
@@ -390,6 +403,13 @@ class CreateInventoryBalanceController extends AsyncNotifier<void> {
     state = await AsyncValue.guard(() async {
       await useCase.call(input);
       ref.invalidate(inventoryBalancesInfiniteListProvider);
+      ref.invalidate(inventoryBalancesByFarmProvider(input.farmId));
+      ref.invalidate(
+        inventoryBalancesByLocationProvider((
+          farmId: input.farmId,
+          inventoryLocationId: input.inventoryLocationId,
+        )),
+      );
     });
   }
 }

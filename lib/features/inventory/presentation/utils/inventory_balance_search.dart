@@ -2,18 +2,32 @@ import 'package:field_management_app/features/inventory/domain/entities/inventor
 
 List<InventoryBalance> filterInventoryBalancesBySearch(
   List<InventoryBalance> items, {
-  required Map<String, String> productNameById,
   String? search,
+  String? inventoryLocationId,
+  String? productId,
 }) {
   final normalizedSearch = search?.trim().toLowerCase();
-  if (normalizedSearch == null || normalizedSearch.isEmpty) {
-    return items;
-  }
-
   return items.where((balance) {
-    final productName = productNameById[balance.productId]?.toLowerCase() ?? '';
-    final productId = balance.productId.toLowerCase();
+    if (inventoryLocationId != null &&
+        balance.inventoryLocationId != inventoryLocationId) {
+      return false;
+    }
+
+    if (productId != null && balance.productId != productId) {
+      return false;
+    }
+
+    if (normalizedSearch == null || normalizedSearch.isEmpty) {
+      return true;
+    }
+
+    final productName = balance.product?.name.toLowerCase() ?? '';
+    final balanceProductId = balance.productId.toLowerCase();
+    final productCode = balance.product?.code?.toLowerCase() ?? '';
+    final locationName = balance.inventoryLocation?.name.toLowerCase() ?? '';
     return productName.contains(normalizedSearch) ||
-        productId.contains(normalizedSearch);
+        balanceProductId.contains(normalizedSearch) ||
+        productCode.contains(normalizedSearch) ||
+        locationName.contains(normalizedSearch);
   }).toList();
 }

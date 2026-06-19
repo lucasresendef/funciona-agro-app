@@ -3,61 +3,25 @@ import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_page.dart';
 import 'package:field_management_app/design_system/foundations/app_spacing.dart';
 import 'package:field_management_app/features/field_operations/domain/entities/field_operation_models.dart';
-import 'package:field_management_app/features/fields/presentation/controllers/fields_controller.dart';
-import 'package:field_management_app/features/products/presentation/controllers/products_controller.dart';
-import 'package:field_management_app/features/units/presentation/controllers/units_controller.dart';
 import 'package:field_management_app/shared/models/app_enums.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class OperationSummaryPage extends ConsumerStatefulWidget {
+class OperationSummaryPage extends StatelessWidget {
   const OperationSummaryPage({required this.operation, super.key});
 
   final FieldOperation operation;
 
   @override
-  ConsumerState<OperationSummaryPage> createState() =>
-      _OperationSummaryPageState();
-}
-
-class _OperationSummaryPageState extends ConsumerState<OperationSummaryPage> {
-  @override
   Widget build(BuildContext context) {
-    final operation = widget.operation;
-    final productsAsync = ref.watch(allActiveProductsProvider);
-    final productNames = productsAsync.maybeWhen(
-      data: (products) => <String, String>{
-        for (final product in products) product.metadata.id: product.name,
-      },
-      orElse: () => const <String, String>{},
-    );
-    final productUnitIdByProductId = productsAsync.maybeWhen(
-      data: (products) => <String, String>{
-        for (final product in products)
-          product.metadata.id: product.unitOfMeasureId,
-      },
-      orElse: () => const <String, String>{},
-    );
-    final unitsAsync = ref.watch(allActiveUnitsProvider);
-    final unitSymbolByUnitId = unitsAsync.maybeWhen(
-      data: (units) => <String, String>{
-        for (final unit in units) unit.metadata.id: unit.symbol,
-      },
-      orElse: () => const <String, String>{},
-    );
-    final fieldsAsync = ref.watch(fieldsByFarmProvider(operation.farmId));
-    final fieldNameById = fieldsAsync.maybeWhen(
-      data: (fields) => <String, String>{
-        for (final field in fields) field.metadata.id: field.name,
-      },
-      orElse: () => const <String, String>{},
-    );
-    final fieldAreaById = fieldsAsync.maybeWhen(
-      data: (fields) => <String, double>{
-        for (final field in fields) field.metadata.id: field.areaHectares,
-      },
-      orElse: () => const <String, double>{},
-    );
+    final operation = this.operation;
+    final fieldNameById = <String, String>{
+      for (final field in operation.fields)
+        field.fieldId: field.name ?? field.fieldId,
+    };
+    final fieldAreaById = <String, double>{
+      for (final field in operation.fields)
+        if (field.areaHectares != null) field.fieldId: field.areaHectares!,
+    };
     final operationFieldIds = operation.fieldIds.isNotEmpty
         ? operation.fieldIds
         : operation.fields.map((field) => field.fieldId).toList();
@@ -87,11 +51,7 @@ class _OperationSummaryPageState extends ConsumerState<OperationSummaryPage> {
       0,
       (sum, item) => sum + (item.quantityConsumed ?? item.quantitySent),
     );
-    final consumedUnitLabel = _resolveConsumedUnitLabel(
-      operation: operation,
-      productUnitIdByProductId: productUnitIdByProductId,
-      unitSymbolByUnitId: unitSymbolByUnitId,
-    );
+    final consumedUnitLabel = _resolveConsumedUnitLabel(operation: operation);
     final totalCost = operation.items.fold<double>(
       0,
       (sum, item) =>
@@ -137,6 +97,11 @@ class _OperationSummaryPageState extends ConsumerState<OperationSummaryPage> {
                     label: 'Talhões',
                     value: operationFieldNamesWithArea,
                   ),
+                  if (operation.inventoryLocation != null)
+                    _SummaryRow(
+                      label: 'Local de estoque',
+                      value: operation.inventoryLocation!.name,
+                    ),
                   _SummaryRow(
                     label: 'Área total',
                     value: totalAreaHectares <= 0
@@ -240,11 +205,7 @@ class _OperationSummaryPageState extends ConsumerState<OperationSummaryPage> {
                     final index = entry.key;
                     final item = entry.value;
                     final consumed = item.quantityConsumed ?? item.quantitySent;
-                    final unitSymbol = _resolveUnitSymbol(
-                      productId: item.productId,
-                      productUnitIdByProductId: productUnitIdByProductId,
-                      unitSymbolByUnitId: unitSymbolByUnitId,
-                    );
+                    final unitSymbol = _resolveUnitSymbol(item);
                     final lineTotal =
                         (item.totalCostConsumed ?? consumed) *
                         item.unitCostAtOperation;
@@ -255,13 +216,11 @@ class _OperationSummaryPageState extends ConsumerState<OperationSummaryPage> {
                             : AppSpacing.sm,
                       ),
                       child: _ConsumptionProductCard(
-                        productName:
-                            productNames[item.productId] ?? item.productId,
+                        productName: item.product?.name ?? item.productId,
                         unitSymbol: unitSymbol,
                         consumed: consumed,
                         lineTotal: lineTotal,
                         fieldResults: item.fieldResults,
-                        fieldNameById: fieldNameById,
                         notes: item.notes,
                       ),
                     );
@@ -343,29 +302,12 @@ String _operationLabel(int? sequenceNumber) {
   return 'Operação #$sequenceNumber';
 }
 
-String _resolveUnitSymbol({
-  required String productId,
-  required Map<String, String> productUnitIdByProductId,
-  required Map<String, String> unitSymbolByUnitId,
-}) {
-  final unitId = productUnitIdByProductId[productId];
-  return unitId == null ? 'un.' : (unitSymbolByUnitId[unitId] ?? 'un.');
+String _resolveUnitSymbol(FieldOperationItem item) {
+  return item.product?.unitOfMeasureSymbol ?? 'un.';
 }
 
-String _resolveConsumedUnitLabel({
-  required FieldOperation operation,
-  required Map<String, String> productUnitIdByProductId,
-  required Map<String, String> unitSymbolByUnitId,
-}) {
-  final symbols = operation.items
-      .map(
-        (item) => _resolveUnitSymbol(
-          productId: item.productId,
-          productUnitIdByProductId: productUnitIdByProductId,
-          unitSymbolByUnitId: unitSymbolByUnitId,
-        ),
-      )
-      .toSet();
+String _resolveConsumedUnitLabel({required FieldOperation operation}) {
+  final symbols = operation.items.map(_resolveUnitSymbol).toSet();
 
   if (symbols.isEmpty) {
     return 'un.';
@@ -490,7 +432,6 @@ class _ConsumptionProductCard extends StatelessWidget {
     required this.consumed,
     required this.lineTotal,
     required this.fieldResults,
-    required this.fieldNameById,
     required this.notes,
   });
 
@@ -499,7 +440,6 @@ class _ConsumptionProductCard extends StatelessWidget {
   final double consumed;
   final double lineTotal;
   final List<FieldOperationItemFieldResult> fieldResults;
-  final Map<String, String> fieldNameById;
   final String? notes;
 
   @override
@@ -568,10 +508,7 @@ class _ConsumptionProductCard extends StatelessWidget {
             ),
           ...fieldResults.map((result) {
             final allocatedQuantity = result.allocatedQuantityConsumed ?? 0;
-            final fieldName =
-                result.fieldName ??
-                fieldNameById[result.fieldId] ??
-                result.fieldId;
+            final fieldName = result.fieldName ?? result.fieldId;
             final percentage = totalAllocated <= 0
                 ? null
                 : (allocatedQuantity / totalAllocated) * 100;

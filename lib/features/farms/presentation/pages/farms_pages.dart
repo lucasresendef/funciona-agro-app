@@ -28,6 +28,8 @@ class FarmsPage extends ConsumerWidget {
     final farmsAsync = ref.watch(farmsInfiniteListProvider);
     final filter = ref.watch(farmsFilterProvider);
     final isAdmin = ref.watch(isAdminProvider);
+    final hasActiveFilters =
+        (filter.search?.trim().isNotEmpty ?? false) || filter.active != true;
 
     return AppPage(
       title: 'Fazendas',
@@ -44,6 +46,18 @@ class FarmsPage extends ConsumerWidget {
           AppSearchBar(
             initialValue: filter.search,
             hintText: 'Buscar por nome',
+            actions: [
+              IconButton.filledTonal(
+                tooltip: 'Limpar filtros',
+                onPressed: hasActiveFilters
+                    ? () {
+                        ref.read(farmsFilterProvider.notifier).state =
+                            const FarmsFilter();
+                      }
+                    : null,
+                icon: const Icon(Icons.filter_alt_off_rounded),
+              ),
+            ],
             onChanged: (value) {
               ref.read(farmsFilterProvider.notifier).state = filter.copyWith(
                 search: value,

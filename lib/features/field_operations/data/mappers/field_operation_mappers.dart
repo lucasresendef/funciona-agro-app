@@ -21,6 +21,7 @@ extension FieldOperationDtoMapper on FieldOperationDto {
       ),
       sequenceNumber: sequenceNumber,
       farmId: farmId,
+      inventoryLocationId: inventoryLocationId,
       fieldIds: resolvedFieldIds,
       fields: fields.map((field) => field.toEntity()).toList(),
       operationDate: operationDate,
@@ -29,6 +30,16 @@ extension FieldOperationDtoMapper on FieldOperationDto {
       responsibleUserId: responsibleUserId,
       startedAt: startedAt,
       finishedAt: finishedAt,
+      farm: farm == null
+          ? null
+          : FieldOperationFarmRef(id: farm!.id, name: farm!.name),
+      inventoryLocation: inventoryLocation == null
+          ? null
+          : FieldOperationInventoryLocationRef(
+              id: inventoryLocation!.id,
+              name: inventoryLocation!.name,
+              farmId: inventoryLocation!.farmId,
+            ),
       items: items.map((item) => item.toEntity()).toList(),
     );
   }
@@ -38,8 +49,8 @@ extension FieldOperationFieldRefDtoMapper on FieldOperationFieldRefDto {
   FieldOperationFieldRef toEntity() {
     return FieldOperationFieldRef(
       fieldId: fieldId,
-      name: name,
-      areaHectares: areaHectares,
+      name: field?.name,
+      areaHectares: areaHectaresSnapshot ?? field?.areaHectares,
     );
   }
 }
@@ -67,6 +78,15 @@ extension FieldOperationItemDtoMapper on FieldOperationItemDto {
       unitCostAtOperation: unitCostAtOperation,
       totalCostConsumed: totalCostConsumed,
       notes: notes,
+      product: product == null
+          ? null
+          : FieldOperationProductRef(
+              id: product!.id,
+              name: product!.name,
+              code: product!.code,
+              unitOfMeasureName: product!.unitOfMeasure?.name,
+              unitOfMeasureSymbol: product!.unitOfMeasure?.symbol,
+            ),
       fieldResults: fieldResults.map((result) => result.toEntity()).toList(),
     );
   }
@@ -77,7 +97,7 @@ extension FieldOperationItemFieldResultDtoMapper
   FieldOperationItemFieldResult toEntity() {
     return FieldOperationItemFieldResult(
       fieldId: fieldId,
-      fieldName: fieldName,
+      fieldName: field?.name,
       allocatedQuantityConsumed: allocatedQuantityConsumed,
       allocatedCostConsumed: allocatedCostConsumed,
     );

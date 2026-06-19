@@ -37,6 +37,8 @@ extension FieldOperationsStatusScopeX on FieldOperationsStatusScope {
 }
 
 class FieldOperationsFilter {
+  static const _unset = Object();
+
   const FieldOperationsFilter({
     this.farmId,
     this.fieldId,
@@ -50,14 +52,14 @@ class FieldOperationsFilter {
   final bool? active;
 
   FieldOperationsFilter copyWith({
-    String? farmId,
-    String? fieldId,
+    Object? farmId = _unset,
+    Object? fieldId = _unset,
     FieldOperationsStatusScope? statusScope,
     bool? active,
   }) {
     return FieldOperationsFilter(
-      farmId: farmId ?? this.farmId,
-      fieldId: fieldId ?? this.fieldId,
+      farmId: identical(farmId, _unset) ? this.farmId : farmId as String?,
+      fieldId: identical(fieldId, _unset) ? this.fieldId : fieldId as String?,
       statusScope: statusScope ?? this.statusScope,
       active: active ?? this.active,
     );
@@ -69,6 +71,8 @@ final fieldOperationsFilterProvider = StateProvider<FieldOperationsFilter>((
 ) {
   return const FieldOperationsFilter();
 });
+
+final fieldOperationsSearchProvider = StateProvider<String>((ref) => '');
 
 final fieldOperationsInfiniteListProvider =
     AsyncNotifierProvider<
@@ -92,6 +96,32 @@ final fieldOperationsProvider = FutureProvider<List<FieldOperation>>((
     active: filter.active,
   );
 });
+
+final fieldOperationsSearchResultsProvider =
+    FutureProvider<List<FieldOperation>>((ref) async {
+      final filter = ref.watch(fieldOperationsFilterProvider);
+      final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
+      final useCase = GetFieldOperationsUseCase(
+        ref.watch(fieldOperationsRepositoryProvider),
+      );
+
+      final responses = await Future.wait(
+        filter.statusScope.statuses
+            .map(
+              (status) => useCase.call(
+                farmId: filter.farmId ?? selectedFarmId,
+                fieldId: filter.fieldId,
+                status: status,
+                active: filter.active,
+              ),
+            )
+            .toList(),
+      );
+
+      return mergeAndSortFieldOperations(
+        responses.expand((items) => items).toList(),
+      );
+    });
 
 class FieldOperationsInfiniteListController
     extends AsyncNotifier<InfiniteListState<FieldOperation>> {
@@ -239,30 +269,32 @@ class FieldOperationsInfiniteListController
 
   List<FieldOperation> _mergeAndSortOperations(
     List<FieldOperation> operations,
-  ) {
-    final mapById = <String, FieldOperation>{
-      for (final item in operations) item.metadata.id: item,
-    };
-    final merged = mapById.values.toList();
-    merged.sort((a, b) {
-      final operationDateComparison = b.operationDate.compareTo(
-        a.operationDate,
-      );
-      if (operationDateComparison != 0) {
-        return operationDateComparison;
+  ) => mergeAndSortFieldOperations(operations);
+}
+
+List<FieldOperation> mergeAndSortFieldOperations(
+  List<FieldOperation> operations,
+) {
+  final mapById = <String, FieldOperation>{
+    for (final item in operations) item.metadata.id: item,
+  };
+  final merged = mapById.values.toList();
+  merged.sort((a, b) {
+    final operationDateComparison = b.operationDate.compareTo(a.operationDate);
+    if (operationDateComparison != 0) {
+      return operationDateComparison;
+    }
+    final createdAtA = a.metadata.createdAt;
+    final createdAtB = b.metadata.createdAt;
+    if (createdAtA != null && createdAtB != null) {
+      final createdComparison = createdAtB.compareTo(createdAtA);
+      if (createdComparison != 0) {
+        return createdComparison;
       }
-      final createdAtA = a.metadata.createdAt;
-      final createdAtB = b.metadata.createdAt;
-      if (createdAtA != null && createdAtB != null) {
-        final createdComparison = createdAtB.compareTo(createdAtA);
-        if (createdComparison != 0) {
-          return createdComparison;
-        }
-      }
-      return (b.sequenceNumber ?? 0).compareTo(a.sequenceNumber ?? 0);
-    });
-    return merged;
-  }
+    }
+    return (b.sequenceNumber ?? 0).compareTo(a.sequenceNumber ?? 0);
+  });
+  return merged;
 }
 
 final createFieldOperationControllerProvider =

@@ -23,6 +23,7 @@ _FieldOperationDto _$FieldOperationDtoFromJson(
   updatedBy: json['updatedBy'] as String?,
   updatedByEmail: json['updatedByEmail'] as String?,
   farmId: json['farmId'] as String,
+  inventoryLocationId: json['inventoryLocationId'] as String?,
   fieldIds:
       (json['fieldIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
@@ -44,6 +45,14 @@ _FieldOperationDto _$FieldOperationDtoFromJson(
   finishedAt: json['finishedAt'] == null
       ? null
       : DateTime.parse(json['finishedAt'] as String),
+  farm: json['farm'] == null
+      ? null
+      : FieldOperationFarmRefDto.fromJson(json['farm'] as Map<String, dynamic>),
+  inventoryLocation: json['inventoryLocation'] == null
+      ? null
+      : FieldOperationInventoryLocationRefDto.fromJson(
+          json['inventoryLocation'] as Map<String, dynamic>,
+        ),
   items:
       (json['items'] as List<dynamic>?)
           ?.map(
@@ -65,6 +74,7 @@ Map<String, dynamic> _$FieldOperationDtoToJson(_FieldOperationDto instance) =>
       'updatedBy': instance.updatedBy,
       'updatedByEmail': instance.updatedByEmail,
       'farmId': instance.farmId,
+      'inventoryLocationId': instance.inventoryLocationId,
       'fieldIds': instance.fieldIds,
       'fields': instance.fields,
       'operationDate': instance.operationDate.toIso8601String(),
@@ -73,6 +83,8 @@ Map<String, dynamic> _$FieldOperationDtoToJson(_FieldOperationDto instance) =>
       'responsibleUserId': instance.responsibleUserId,
       'startedAt': instance.startedAt?.toIso8601String(),
       'finishedAt': instance.finishedAt?.toIso8601String(),
+      'farm': instance.farm,
+      'inventoryLocation': instance.inventoryLocation,
       'items': instance.items,
     };
 
@@ -82,18 +94,75 @@ const _$FieldOperationStatusEnumMap = {
   FieldOperationStatus.canceled: 'CANCELED',
 };
 
+_FieldOperationFarmRefDto _$FieldOperationFarmRefDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationFarmRefDto(
+  id: json['id'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$FieldOperationFarmRefDtoToJson(
+  _FieldOperationFarmRefDto instance,
+) => <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+_FieldOperationInventoryLocationRefDto
+_$FieldOperationInventoryLocationRefDtoFromJson(Map<String, dynamic> json) =>
+    _FieldOperationInventoryLocationRefDto(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      farmId: json['farmId'] as String?,
+    );
+
+Map<String, dynamic> _$FieldOperationInventoryLocationRefDtoToJson(
+  _FieldOperationInventoryLocationRefDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'farmId': instance.farmId,
+};
+
 _FieldOperationFieldRefDto _$FieldOperationFieldRefDtoFromJson(
   Map<String, dynamic> json,
 ) => _FieldOperationFieldRefDto(
+  id: json['id'] as String?,
+  fieldOperationId: json['fieldOperationId'] as String?,
   fieldId: json['fieldId'] as String,
-  name: json['name'] as String?,
-  areaHectares: const OptionalDoubleConverter().fromJson(json['areaHectares']),
+  areaHectaresSnapshot: const OptionalDoubleConverter().fromJson(
+    json['areaHectaresSnapshot'],
+  ),
+  active: json['active'] as bool?,
+  field: json['field'] == null
+      ? null
+      : FieldOperationFieldLookupDto.fromJson(
+          json['field'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$FieldOperationFieldRefDtoToJson(
   _FieldOperationFieldRefDto instance,
 ) => <String, dynamic>{
+  'id': instance.id,
+  'fieldOperationId': instance.fieldOperationId,
   'fieldId': instance.fieldId,
+  'areaHectaresSnapshot': const OptionalDoubleConverter().toJson(
+    instance.areaHectaresSnapshot,
+  ),
+  'active': instance.active,
+  'field': instance.field,
+};
+
+_FieldOperationFieldLookupDto _$FieldOperationFieldLookupDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationFieldLookupDto(
+  id: json['id'] as String,
+  name: json['name'] as String?,
+  areaHectares: const OptionalDoubleConverter().fromJson(json['areaHectares']),
+);
+
+Map<String, dynamic> _$FieldOperationFieldLookupDtoToJson(
+  _FieldOperationFieldLookupDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
   'name': instance.name,
   'areaHectares': const OptionalDoubleConverter().toJson(instance.areaHectares),
 };
@@ -129,6 +198,11 @@ _FieldOperationItemDto _$FieldOperationItemDtoFromJson(
     json['totalCostConsumed'],
   ),
   notes: json['notes'] as String?,
+  product: json['product'] == null
+      ? null
+      : FieldOperationProductRefDto.fromJson(
+          json['product'] as Map<String, dynamic>,
+        ),
   fieldResults:
       (json['fieldResults'] as List<dynamic>?)
           ?.map(
@@ -167,31 +241,78 @@ Map<String, dynamic> _$FieldOperationItemDtoToJson(
     instance.totalCostConsumed,
   ),
   'notes': instance.notes,
+  'product': instance.product,
   'fieldResults': instance.fieldResults,
+};
+
+_FieldOperationProductRefDto _$FieldOperationProductRefDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationProductRefDto(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  code: json['code'] as String?,
+  unitOfMeasure: json['unitOfMeasure'] == null
+      ? null
+      : FieldOperationUnitOfMeasureDto.fromJson(
+          json['unitOfMeasure'] as Map<String, dynamic>,
+        ),
+);
+
+Map<String, dynamic> _$FieldOperationProductRefDtoToJson(
+  _FieldOperationProductRefDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'code': instance.code,
+  'unitOfMeasure': instance.unitOfMeasure,
+};
+
+_FieldOperationUnitOfMeasureDto _$FieldOperationUnitOfMeasureDtoFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationUnitOfMeasureDto(
+  id: json['id'] as String,
+  name: json['name'] as String?,
+  symbol: json['symbol'] as String?,
+);
+
+Map<String, dynamic> _$FieldOperationUnitOfMeasureDtoToJson(
+  _FieldOperationUnitOfMeasureDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'symbol': instance.symbol,
 };
 
 _FieldOperationItemFieldResultDto _$FieldOperationItemFieldResultDtoFromJson(
   Map<String, dynamic> json,
 ) => _FieldOperationItemFieldResultDto(
+  id: json['id'] as String?,
+  fieldOperationItemId: json['fieldOperationItemId'] as String?,
   fieldId: json['fieldId'] as String,
-  fieldName: json['fieldName'] as String?,
+  field: json['field'] == null
+      ? null
+      : FieldOperationFieldLookupDto.fromJson(
+          json['field'] as Map<String, dynamic>,
+        ),
   allocatedQuantityConsumed: const OptionalDoubleConverter().fromJson(
     json['allocatedQuantityConsumed'],
   ),
   allocatedCostConsumed: const OptionalDoubleConverter().fromJson(
-    json['allocatedCostConsumed'],
+    json['allocatedTotalCostConsumed'],
   ),
 );
 
 Map<String, dynamic> _$FieldOperationItemFieldResultDtoToJson(
   _FieldOperationItemFieldResultDto instance,
 ) => <String, dynamic>{
+  'id': instance.id,
+  'fieldOperationItemId': instance.fieldOperationItemId,
   'fieldId': instance.fieldId,
-  'fieldName': instance.fieldName,
+  'field': instance.field,
   'allocatedQuantityConsumed': const OptionalDoubleConverter().toJson(
     instance.allocatedQuantityConsumed,
   ),
-  'allocatedCostConsumed': const OptionalDoubleConverter().toJson(
+  'allocatedTotalCostConsumed': const OptionalDoubleConverter().toJson(
     instance.allocatedCostConsumed,
   ),
 };

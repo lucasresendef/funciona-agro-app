@@ -12,6 +12,7 @@ _FieldOperation _$FieldOperationFromJson(
   metadata: AuditMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
   sequenceNumber: (json['sequenceNumber'] as num?)?.toInt(),
   farmId: json['farmId'] as String,
+  inventoryLocationId: json['inventoryLocationId'] as String?,
   fieldIds:
       (json['fieldIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
@@ -32,6 +33,14 @@ _FieldOperation _$FieldOperationFromJson(
   finishedAt: json['finishedAt'] == null
       ? null
       : DateTime.parse(json['finishedAt'] as String),
+  farm: json['farm'] == null
+      ? null
+      : FieldOperationFarmRef.fromJson(json['farm'] as Map<String, dynamic>),
+  inventoryLocation: json['inventoryLocation'] == null
+      ? null
+      : FieldOperationInventoryLocationRef.fromJson(
+          json['inventoryLocation'] as Map<String, dynamic>,
+        ),
   items:
       (json['items'] as List<dynamic>?)
           ?.map((e) => FieldOperationItem.fromJson(e as Map<String, dynamic>))
@@ -44,6 +53,7 @@ Map<String, dynamic> _$FieldOperationToJson(_FieldOperation instance) =>
       'metadata': instance.metadata,
       'sequenceNumber': instance.sequenceNumber,
       'farmId': instance.farmId,
+      'inventoryLocationId': instance.inventoryLocationId,
       'fieldIds': instance.fieldIds,
       'fields': instance.fields,
       'operationDate': instance.operationDate.toIso8601String(),
@@ -52,6 +62,8 @@ Map<String, dynamic> _$FieldOperationToJson(_FieldOperation instance) =>
       'responsibleUserId': instance.responsibleUserId,
       'startedAt': instance.startedAt?.toIso8601String(),
       'finishedAt': instance.finishedAt?.toIso8601String(),
+      'farm': instance.farm,
+      'inventoryLocation': instance.inventoryLocation,
       'items': instance.items,
     };
 
@@ -59,6 +71,33 @@ const _$FieldOperationStatusEnumMap = {
   FieldOperationStatus.open: 'OPEN',
   FieldOperationStatus.finished: 'FINISHED',
   FieldOperationStatus.canceled: 'CANCELED',
+};
+
+_FieldOperationFarmRef _$FieldOperationFarmRefFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationFarmRef(
+  id: json['id'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$FieldOperationFarmRefToJson(
+  _FieldOperationFarmRef instance,
+) => <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+_FieldOperationInventoryLocationRef
+_$FieldOperationInventoryLocationRefFromJson(Map<String, dynamic> json) =>
+    _FieldOperationInventoryLocationRef(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      farmId: json['farmId'] as String?,
+    );
+
+Map<String, dynamic> _$FieldOperationInventoryLocationRefToJson(
+  _FieldOperationInventoryLocationRef instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'farmId': instance.farmId,
 };
 
 _FieldOperationFieldRef _$FieldOperationFieldRefFromJson(
@@ -98,6 +137,11 @@ _FieldOperationItem _$FieldOperationItemFromJson(Map<String, dynamic> json) =>
         json['totalCostConsumed'],
       ),
       notes: json['notes'] as String?,
+      product: json['product'] == null
+          ? null
+          : FieldOperationProductRef.fromJson(
+              json['product'] as Map<String, dynamic>,
+            ),
       fieldResults:
           (json['fieldResults'] as List<dynamic>?)
               ?.map(
@@ -128,8 +172,29 @@ Map<String, dynamic> _$FieldOperationItemToJson(_FieldOperationItem instance) =>
         instance.totalCostConsumed,
       ),
       'notes': instance.notes,
+      'product': instance.product,
       'fieldResults': instance.fieldResults,
     };
+
+_FieldOperationProductRef _$FieldOperationProductRefFromJson(
+  Map<String, dynamic> json,
+) => _FieldOperationProductRef(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  code: json['code'] as String?,
+  unitOfMeasureName: json['unitOfMeasureName'] as String?,
+  unitOfMeasureSymbol: json['unitOfMeasureSymbol'] as String?,
+);
+
+Map<String, dynamic> _$FieldOperationProductRefToJson(
+  _FieldOperationProductRef instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'code': instance.code,
+  'unitOfMeasureName': instance.unitOfMeasureName,
+  'unitOfMeasureSymbol': instance.unitOfMeasureSymbol,
+};
 
 _FieldOperationItemFieldResult _$FieldOperationItemFieldResultFromJson(
   Map<String, dynamic> json,

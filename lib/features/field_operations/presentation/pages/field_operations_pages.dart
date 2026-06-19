@@ -17,13 +17,13 @@ import 'package:field_management_app/design_system/foundations/app_spacing.dart'
 import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
 import 'package:field_management_app/features/field_operations/domain/entities/field_operation_models.dart';
 import 'package:field_management_app/features/field_operations/presentation/controllers/field_operations_controller.dart';
+import 'package:field_management_app/features/field_operations/presentation/utils/field_operation_search.dart';
 import 'package:field_management_app/features/field_operations/presentation/utils/operation_stock_math.dart';
 import 'package:field_management_app/features/field_operations/presentation/widgets/operation_summary_page.dart';
 import 'package:field_management_app/features/field_operations/presentation/widgets/product_picker_sheet.dart';
 import 'package:field_management_app/features/fields/presentation/controllers/fields_controller.dart';
 import 'package:field_management_app/features/inventory/presentation/controllers/inventory_controller.dart';
 import 'package:field_management_app/features/products/domain/entities/product.dart';
-import 'package:field_management_app/features/products/presentation/controllers/products_controller.dart';
 import 'package:field_management_app/shared/models/app_enums.dart';
 import 'package:field_management_app/core/utils/validators.dart';
 import 'package:flutter/material.dart';
@@ -39,14 +39,23 @@ class FieldOperationsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final operationsAsync = ref.watch(fieldOperationsInfiniteListProvider);
     final filter = ref.watch(fieldOperationsFilterProvider);
+    final search = ref.watch(fieldOperationsSearchProvider);
+    final searchResultsAsync = search.trim().isNotEmpty
+        ? ref.watch(fieldOperationsSearchResultsProvider)
+        : null;
     final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
-    final fieldsByFarmAsync = ref.watch(fieldsByFarmProvider(selectedFarmId));
-    final fieldNameById = fieldsByFarmAsync.maybeWhen(
-      data: (fields) => <String, String>{
-        for (final field in fields) field.metadata.id: field.name,
-      },
-      orElse: () => const <String, String>{},
-    );
+    final fieldsAsync = ref.watch(fieldsByFarmProvider(selectedFarmId));
+    final hasActiveFilters =
+        search.trim().isNotEmpty ||
+        filter.fieldId != null ||
+        filter.statusScope != FieldOperationsStatusScope.openAndFinished;
+    final availableFieldIds = fieldsAsync.asData?.value
+            .map((field) => field.metadata.id)
+            .toSet() ??
+        const <String>{};
+    final selectedFieldId = availableFieldIds.contains(filter.fieldId)
+        ? filter.fieldId
+        : null;
 
     return AppPage(
       title: 'Operações',
@@ -62,7 +71,57 @@ class FieldOperationsPage extends ConsumerWidget {
       ],
       child: Column(
         children: [
-          AppSearchBar(hintText: 'Filtre as operações', onChanged: (_) {}),
+          AppSearchBar(
+            initialValue: search,
+            hintText: 'Buscar operações',
+            actions: [
+              IconButton.filledTonal(
+                tooltip: 'Limpar filtros',
+                onPressed: hasActiveFilters
+                    ? () {
+                        ref.read(fieldOperationsFilterProvider.notifier).state =
+                            const FieldOperationsFilter();
+                        ref.read(fieldOperationsSearchProvider.notifier).state =
+                            '';
+                      }
+                    : null,
+                icon: const Icon(Icons.filter_alt_off_rounded),
+              ),
+            ],
+            onChanged: (value) {
+              ref.read(fieldOperationsSearchProvider.notifier).state = value;
+            },
+            trailing: [
+              fieldsAsync.when(
+                data: (fields) => AppDropdownField<String?>(
+                  label: 'Talhão',
+                  value: selectedFieldId,
+                  hintText: 'Todos',
+                  items: [
+                    const DropdownMenuItem<String?>(
+                      value: null,
+                      child: Text('Todos'),
+                    ),
+                    ...fields.map(
+                      (field) => DropdownMenuItem<String?>(
+                        value: field.metadata.id,
+                        child: Text(
+                          field.name,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    ref.read(fieldOperationsFilterProvider.notifier).state =
+                        filter.copyWith(fieldId: value);
+                  },
+                ),
+                loading: () => const AppFieldLoading(),
+                error: (_, __) => const Text('Falha ao carregar talhões.'),
+              ),
+            ],
+          ),
           const SizedBox(height: AppSpacing.sm),
           Align(
             alignment: Alignment.centerLeft,
@@ -92,8 +151,70 @@ class FieldOperationsPage extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
-            child: operationsAsync.when(
-              data: (listState) {
+            child: search.trim().isNotEmpty
+                ? searchResultsAsync!.when(
+                    data: (operations) {
+                      final filteredOperations = filterFieldOperationsBySearch(
+                        operations,
+                        search: search,
+                      );
+                      if (filteredOperations.isEmpty) {
+                        return const EmptyStateView(
+                          title: 'Nenhuma operação encontrada',
+                          message:
+                              'Nenhuma operação corresponde aos filtros informados.',
+                        );
+                      }
+
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(fieldOperationsSearchResultsProvider);
+                          await ref.read(
+                            fieldOperationsSearchResultsProvider.future,
+                          );
+                        },
+                        child: ListView.separated(
+                          itemCount: filteredOperations.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: AppSpacing.sm),
+                          itemBuilder: (context, index) {
+                            final operation = filteredOperations[index];
+                            final names = operation.fields.isNotEmpty
+                                ? operation.fields
+                                      .map(
+                                        (field) => field.name ?? field.fieldId,
+                                      )
+                                      .toList()
+                                : operation.fieldIds;
+                            return _FieldOperationTile(
+                              operation: operation,
+                              fieldNames: names,
+                              onTap: () => showAppFormSheet<void>(
+                                context: context,
+                                child:
+                                    operation.status ==
+                                        FieldOperationStatus.open
+                                    ? FinalizeFieldOperationPage(
+                                        operation: operation,
+                                      )
+                                    : OperationSummaryPage(
+                                        operation: operation,
+                                      ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    loading: () => const LoadingStateView(),
+                    error: (error, _) => ErrorStateView(
+                      message: error.toString(),
+                      onRetry: () =>
+                          ref.invalidate(fieldOperationsSearchResultsProvider),
+                    ),
+                  )
+                : operationsAsync.when(
+                    data: (listState) {
                 final operations = listState.items;
                 if (operations.isEmpty) {
                   return const EmptyStateView(
@@ -115,12 +236,11 @@ class FieldOperationsPage extends ConsumerWidget {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, operation, _) {
-                    final rawFieldIds = operation.fieldIds.isNotEmpty
-                        ? operation.fieldIds
-                        : operation.fields.map((field) => field.fieldId);
-                    final names = rawFieldIds
-                        .map((id) => fieldNameById[id] ?? id)
-                        .toList();
+                    final names = operation.fields.isNotEmpty
+                        ? operation.fields
+                              .map((field) => field.name ?? field.fieldId)
+                              .toList()
+                        : operation.fieldIds;
                     return _FieldOperationTile(
                       operation: operation,
                       fieldNames: names,
@@ -1102,13 +1222,6 @@ class _FinalizeFieldOperationPageState
     });
 
     final state = ref.watch(updateFieldOperationControllerProvider);
-    final productsAsync = ref.watch(allActiveProductsProvider);
-    final productNames = productsAsync.maybeWhen(
-      data: (products) => <String, String>{
-        for (final product in products) product.metadata.id: product.name,
-      },
-      orElse: () => const <String, String>{},
-    );
 
     return AppPage(
       title: 'Devolutiva da operação',
@@ -1125,11 +1238,7 @@ class _FinalizeFieldOperationPageState
                 ),
                 const SizedBox(height: AppSpacing.md),
                 for (var i = 0; i < _items.length; i++) ...[
-                  _FinalizeItemCard(
-                    index: i,
-                    draft: _items[i],
-                    productName: productNames[_items[i].productId],
-                  ),
+                  _FinalizeItemCard(index: i, draft: _items[i]),
                   const SizedBox(height: AppSpacing.sm),
                 ],
                 const SizedBox(height: AppSpacing.md),
@@ -1235,15 +1344,10 @@ class _FinalizeFieldOperationPageState
 }
 
 class _FinalizeItemCard extends StatelessWidget {
-  const _FinalizeItemCard({
-    required this.index,
-    required this.draft,
-    this.productName,
-  });
+  const _FinalizeItemCard({required this.index, required this.draft});
 
   final int index;
   final _FinalizeItemDraft draft;
-  final String? productName;
 
   @override
   Widget build(BuildContext context) {
@@ -1255,7 +1359,7 @@ class _FinalizeItemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Item ${index + 1}: ${productName ?? draft.productId}',
+            'Item ${index + 1}: ${draft.productName ?? draft.productId}',
             style: Theme.of(
               context,
             ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -1291,6 +1395,7 @@ class _FinalizeItemDraft {
   _FinalizeItemDraft({
     required this.itemId,
     required this.productId,
+    required this.productName,
     required this.quantitySent,
     required this.unitCostAtOperation,
     required double quantityReturned,
@@ -1306,6 +1411,7 @@ class _FinalizeItemDraft {
     return _FinalizeItemDraft(
       itemId: item.metadata?.id,
       productId: item.productId,
+      productName: item.product?.name,
       quantitySent: item.quantitySent,
       unitCostAtOperation: item.unitCostAtOperation,
       quantityReturned: item.quantityReturned ?? 0,
@@ -1315,6 +1421,7 @@ class _FinalizeItemDraft {
 
   final String? itemId;
   final String productId;
+  final String? productName;
   final double quantitySent;
   final double unitCostAtOperation;
   final TextEditingController returnedController;

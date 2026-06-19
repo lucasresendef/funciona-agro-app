@@ -68,6 +68,7 @@ abstract class FieldOperation with _$FieldOperation {
     required AuditMetadata metadata,
     int? sequenceNumber,
     required String farmId,
+    String? inventoryLocationId,
     @Default(<String>[]) List<String> fieldIds,
     @Default(<FieldOperationFieldRef>[]) List<FieldOperationFieldRef> fields,
     required DateTime operationDate,
@@ -76,11 +77,38 @@ abstract class FieldOperation with _$FieldOperation {
     String? responsibleUserId,
     DateTime? startedAt,
     DateTime? finishedAt,
+    FieldOperationFarmRef? farm,
+    FieldOperationInventoryLocationRef? inventoryLocation,
     @Default(<FieldOperationItem>[]) List<FieldOperationItem> items,
   }) = _FieldOperation;
 
   factory FieldOperation.fromJson(Map<String, dynamic> json) =>
       _$FieldOperationFromJson(json);
+}
+
+@freezed
+abstract class FieldOperationFarmRef with _$FieldOperationFarmRef {
+  const factory FieldOperationFarmRef({
+    required String id,
+    required String name,
+  }) = _FieldOperationFarmRef;
+
+  factory FieldOperationFarmRef.fromJson(Map<String, dynamic> json) =>
+      _$FieldOperationFarmRefFromJson(json);
+}
+
+@freezed
+abstract class FieldOperationInventoryLocationRef
+    with _$FieldOperationInventoryLocationRef {
+  const factory FieldOperationInventoryLocationRef({
+    required String id,
+    required String name,
+    String? farmId,
+  }) = _FieldOperationInventoryLocationRef;
+
+  factory FieldOperationInventoryLocationRef.fromJson(
+    Map<String, dynamic> json,
+  ) => _$FieldOperationInventoryLocationRefFromJson(json);
 }
 
 @freezed
@@ -107,12 +135,27 @@ abstract class FieldOperationItem with _$FieldOperationItem {
     @DoubleConverter() required double unitCostAtOperation,
     @OptionalDoubleConverter() double? totalCostConsumed,
     String? notes,
+    FieldOperationProductRef? product,
     @Default(<FieldOperationItemFieldResult>[])
     List<FieldOperationItemFieldResult> fieldResults,
   }) = _FieldOperationItem;
 
   factory FieldOperationItem.fromJson(Map<String, dynamic> json) =>
       _$FieldOperationItemFromJson(json);
+}
+
+@freezed
+abstract class FieldOperationProductRef with _$FieldOperationProductRef {
+  const factory FieldOperationProductRef({
+    required String id,
+    required String name,
+    String? code,
+    String? unitOfMeasureName,
+    String? unitOfMeasureSymbol,
+  }) = _FieldOperationProductRef;
+
+  factory FieldOperationProductRef.fromJson(Map<String, dynamic> json) =>
+      _$FieldOperationProductRefFromJson(json);
 }
 
 @freezed

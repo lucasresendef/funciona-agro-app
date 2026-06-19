@@ -580,7 +580,7 @@ as bool,
 /// @nodoc
 mixin _$InventoryBalanceDto {
 
- String get id; bool get active; DateTime? get createdAt; DateTime? get updatedAt; String? get createdBy; String? get createdByEmail; String? get updatedBy; String? get updatedByEmail; String get farmId; String get inventoryLocationId; String get productId;@DoubleConverter() double get quantity;@DoubleConverter() double get averageUnitCost;
+ String get id; bool get active; DateTime? get createdAt; DateTime? get updatedAt; String? get createdBy; String? get createdByEmail; String? get updatedBy; String? get updatedByEmail; String get farmId; String get inventoryLocationId; String get productId;@DoubleConverter() double get quantity;@DoubleConverter() double get averageUnitCost; InventoryBalanceFarmDto? get farm; InventoryBalanceLocationDto? get inventoryLocation; InventoryBalanceProductDto? get product;
 /// Create a copy of InventoryBalanceDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -593,16 +593,16 @@ $InventoryBalanceDtoCopyWith<InventoryBalanceDto> get copyWith => _$InventoryBal
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryBalanceDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.inventoryLocationId, inventoryLocationId) || other.inventoryLocationId == inventoryLocationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.averageUnitCost, averageUnitCost) || other.averageUnitCost == averageUnitCost));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryBalanceDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.inventoryLocationId, inventoryLocationId) || other.inventoryLocationId == inventoryLocationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.averageUnitCost, averageUnitCost) || other.averageUnitCost == averageUnitCost)&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.inventoryLocation, inventoryLocation) || other.inventoryLocation == inventoryLocation)&&(identical(other.product, product) || other.product == product));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,inventoryLocationId,productId,quantity,averageUnitCost);
+int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,inventoryLocationId,productId,quantity,averageUnitCost,farm,inventoryLocation,product);
 
 @override
 String toString() {
-  return 'InventoryBalanceDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, inventoryLocationId: $inventoryLocationId, productId: $productId, quantity: $quantity, averageUnitCost: $averageUnitCost)';
+  return 'InventoryBalanceDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, inventoryLocationId: $inventoryLocationId, productId: $productId, quantity: $quantity, averageUnitCost: $averageUnitCost, farm: $farm, inventoryLocation: $inventoryLocation, product: $product)';
 }
 
 
@@ -613,11 +613,11 @@ abstract mixin class $InventoryBalanceDtoCopyWith<$Res>  {
   factory $InventoryBalanceDtoCopyWith(InventoryBalanceDto value, $Res Function(InventoryBalanceDto) _then) = _$InventoryBalanceDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, String inventoryLocationId, String productId,@DoubleConverter() double quantity,@DoubleConverter() double averageUnitCost
+ String id, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, String inventoryLocationId, String productId,@DoubleConverter() double quantity,@DoubleConverter() double averageUnitCost, InventoryBalanceFarmDto? farm, InventoryBalanceLocationDto? inventoryLocation, InventoryBalanceProductDto? product
 });
 
 
-
+$InventoryBalanceFarmDtoCopyWith<$Res>? get farm;$InventoryBalanceLocationDtoCopyWith<$Res>? get inventoryLocation;$InventoryBalanceProductDtoCopyWith<$Res>? get product;
 
 }
 /// @nodoc
@@ -630,7 +630,7 @@ class _$InventoryBalanceDtoCopyWithImpl<$Res>
 
 /// Create a copy of InventoryBalanceDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? inventoryLocationId = null,Object? productId = null,Object? quantity = null,Object? averageUnitCost = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? inventoryLocationId = null,Object? productId = null,Object? quantity = null,Object? averageUnitCost = null,Object? farm = freezed,Object? inventoryLocation = freezed,Object? product = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
@@ -645,10 +645,49 @@ as String,inventoryLocationId: null == inventoryLocationId ? _self.inventoryLoca
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as double,averageUnitCost: null == averageUnitCost ? _self.averageUnitCost : averageUnitCost // ignore: cast_nullable_to_non_nullable
-as double,
+as double,farm: freezed == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
+as InventoryBalanceFarmDto?,inventoryLocation: freezed == inventoryLocation ? _self.inventoryLocation : inventoryLocation // ignore: cast_nullable_to_non_nullable
+as InventoryBalanceLocationDto?,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
+as InventoryBalanceProductDto?,
   ));
 }
+/// Create a copy of InventoryBalanceDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InventoryBalanceFarmDtoCopyWith<$Res>? get farm {
+    if (_self.farm == null) {
+    return null;
+  }
 
+  return $InventoryBalanceFarmDtoCopyWith<$Res>(_self.farm!, (value) {
+    return _then(_self.copyWith(farm: value));
+  });
+}/// Create a copy of InventoryBalanceDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InventoryBalanceLocationDtoCopyWith<$Res>? get inventoryLocation {
+    if (_self.inventoryLocation == null) {
+    return null;
+  }
+
+  return $InventoryBalanceLocationDtoCopyWith<$Res>(_self.inventoryLocation!, (value) {
+    return _then(_self.copyWith(inventoryLocation: value));
+  });
+}/// Create a copy of InventoryBalanceDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InventoryBalanceProductDtoCopyWith<$Res>? get product {
+    if (_self.product == null) {
+    return null;
+  }
+
+  return $InventoryBalanceProductDtoCopyWith<$Res>(_self.product!, (value) {
+    return _then(_self.copyWith(product: value));
+  });
+}
 }
 
 
@@ -730,10 +769,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String inventoryLocationId,  String productId, @DoubleConverter()  double quantity, @DoubleConverter()  double averageUnitCost)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String inventoryLocationId,  String productId, @DoubleConverter()  double quantity, @DoubleConverter()  double averageUnitCost,  InventoryBalanceFarmDto? farm,  InventoryBalanceLocationDto? inventoryLocation,  InventoryBalanceProductDto? product)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _InventoryBalanceDto() when $default != null:
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.inventoryLocationId,_that.productId,_that.quantity,_that.averageUnitCost);case _:
+return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.inventoryLocationId,_that.productId,_that.quantity,_that.averageUnitCost,_that.farm,_that.inventoryLocation,_that.product);case _:
   return orElse();
 
 }
@@ -751,10 +790,10 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String inventoryLocationId,  String productId, @DoubleConverter()  double quantity, @DoubleConverter()  double averageUnitCost)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String inventoryLocationId,  String productId, @DoubleConverter()  double quantity, @DoubleConverter()  double averageUnitCost,  InventoryBalanceFarmDto? farm,  InventoryBalanceLocationDto? inventoryLocation,  InventoryBalanceProductDto? product)  $default,) {final _that = this;
 switch (_that) {
 case _InventoryBalanceDto():
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.inventoryLocationId,_that.productId,_that.quantity,_that.averageUnitCost);case _:
+return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.inventoryLocationId,_that.productId,_that.quantity,_that.averageUnitCost,_that.farm,_that.inventoryLocation,_that.product);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -771,10 +810,10 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String inventoryLocationId,  String productId, @DoubleConverter()  double quantity, @DoubleConverter()  double averageUnitCost)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  bool active,  DateTime? createdAt,  DateTime? updatedAt,  String? createdBy,  String? createdByEmail,  String? updatedBy,  String? updatedByEmail,  String farmId,  String inventoryLocationId,  String productId, @DoubleConverter()  double quantity, @DoubleConverter()  double averageUnitCost,  InventoryBalanceFarmDto? farm,  InventoryBalanceLocationDto? inventoryLocation,  InventoryBalanceProductDto? product)?  $default,) {final _that = this;
 switch (_that) {
 case _InventoryBalanceDto() when $default != null:
-return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.inventoryLocationId,_that.productId,_that.quantity,_that.averageUnitCost);case _:
+return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.createdBy,_that.createdByEmail,_that.updatedBy,_that.updatedByEmail,_that.farmId,_that.inventoryLocationId,_that.productId,_that.quantity,_that.averageUnitCost,_that.farm,_that.inventoryLocation,_that.product);case _:
   return null;
 
 }
@@ -786,7 +825,7 @@ return $default(_that.id,_that.active,_that.createdAt,_that.updatedAt,_that.crea
 @JsonSerializable()
 
 class _InventoryBalanceDto implements InventoryBalanceDto {
-  const _InventoryBalanceDto({required this.id, required this.active, this.createdAt, this.updatedAt, this.createdBy, this.createdByEmail, this.updatedBy, this.updatedByEmail, required this.farmId, required this.inventoryLocationId, required this.productId, @DoubleConverter() required this.quantity, @DoubleConverter() required this.averageUnitCost});
+  const _InventoryBalanceDto({required this.id, required this.active, this.createdAt, this.updatedAt, this.createdBy, this.createdByEmail, this.updatedBy, this.updatedByEmail, required this.farmId, required this.inventoryLocationId, required this.productId, @DoubleConverter() required this.quantity, @DoubleConverter() required this.averageUnitCost, this.farm, this.inventoryLocation, this.product});
   factory _InventoryBalanceDto.fromJson(Map<String, dynamic> json) => _$InventoryBalanceDtoFromJson(json);
 
 @override final  String id;
@@ -802,6 +841,9 @@ class _InventoryBalanceDto implements InventoryBalanceDto {
 @override final  String productId;
 @override@DoubleConverter() final  double quantity;
 @override@DoubleConverter() final  double averageUnitCost;
+@override final  InventoryBalanceFarmDto? farm;
+@override final  InventoryBalanceLocationDto? inventoryLocation;
+@override final  InventoryBalanceProductDto? product;
 
 /// Create a copy of InventoryBalanceDto
 /// with the given fields replaced by the non-null parameter values.
@@ -816,16 +858,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryBalanceDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.inventoryLocationId, inventoryLocationId) || other.inventoryLocationId == inventoryLocationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.averageUnitCost, averageUnitCost) || other.averageUnitCost == averageUnitCost));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryBalanceDto&&(identical(other.id, id) || other.id == id)&&(identical(other.active, active) || other.active == active)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.createdByEmail, createdByEmail) || other.createdByEmail == createdByEmail)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.updatedByEmail, updatedByEmail) || other.updatedByEmail == updatedByEmail)&&(identical(other.farmId, farmId) || other.farmId == farmId)&&(identical(other.inventoryLocationId, inventoryLocationId) || other.inventoryLocationId == inventoryLocationId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.averageUnitCost, averageUnitCost) || other.averageUnitCost == averageUnitCost)&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.inventoryLocation, inventoryLocation) || other.inventoryLocation == inventoryLocation)&&(identical(other.product, product) || other.product == product));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,inventoryLocationId,productId,quantity,averageUnitCost);
+int get hashCode => Object.hash(runtimeType,id,active,createdAt,updatedAt,createdBy,createdByEmail,updatedBy,updatedByEmail,farmId,inventoryLocationId,productId,quantity,averageUnitCost,farm,inventoryLocation,product);
 
 @override
 String toString() {
-  return 'InventoryBalanceDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, inventoryLocationId: $inventoryLocationId, productId: $productId, quantity: $quantity, averageUnitCost: $averageUnitCost)';
+  return 'InventoryBalanceDto(id: $id, active: $active, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, createdByEmail: $createdByEmail, updatedBy: $updatedBy, updatedByEmail: $updatedByEmail, farmId: $farmId, inventoryLocationId: $inventoryLocationId, productId: $productId, quantity: $quantity, averageUnitCost: $averageUnitCost, farm: $farm, inventoryLocation: $inventoryLocation, product: $product)';
 }
 
 
@@ -836,11 +878,11 @@ abstract mixin class _$InventoryBalanceDtoCopyWith<$Res> implements $InventoryBa
   factory _$InventoryBalanceDtoCopyWith(_InventoryBalanceDto value, $Res Function(_InventoryBalanceDto) _then) = __$InventoryBalanceDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, String inventoryLocationId, String productId,@DoubleConverter() double quantity,@DoubleConverter() double averageUnitCost
+ String id, bool active, DateTime? createdAt, DateTime? updatedAt, String? createdBy, String? createdByEmail, String? updatedBy, String? updatedByEmail, String farmId, String inventoryLocationId, String productId,@DoubleConverter() double quantity,@DoubleConverter() double averageUnitCost, InventoryBalanceFarmDto? farm, InventoryBalanceLocationDto? inventoryLocation, InventoryBalanceProductDto? product
 });
 
 
-
+@override $InventoryBalanceFarmDtoCopyWith<$Res>? get farm;@override $InventoryBalanceLocationDtoCopyWith<$Res>? get inventoryLocation;@override $InventoryBalanceProductDtoCopyWith<$Res>? get product;
 
 }
 /// @nodoc
@@ -853,7 +895,7 @@ class __$InventoryBalanceDtoCopyWithImpl<$Res>
 
 /// Create a copy of InventoryBalanceDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? inventoryLocationId = null,Object? productId = null,Object? quantity = null,Object? averageUnitCost = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? active = null,Object? createdAt = freezed,Object? updatedAt = freezed,Object? createdBy = freezed,Object? createdByEmail = freezed,Object? updatedBy = freezed,Object? updatedByEmail = freezed,Object? farmId = null,Object? inventoryLocationId = null,Object? productId = null,Object? quantity = null,Object? averageUnitCost = null,Object? farm = freezed,Object? inventoryLocation = freezed,Object? product = freezed,}) {
   return _then(_InventoryBalanceDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
@@ -868,7 +910,847 @@ as String,inventoryLocationId: null == inventoryLocationId ? _self.inventoryLoca
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as double,averageUnitCost: null == averageUnitCost ? _self.averageUnitCost : averageUnitCost // ignore: cast_nullable_to_non_nullable
-as double,
+as double,farm: freezed == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
+as InventoryBalanceFarmDto?,inventoryLocation: freezed == inventoryLocation ? _self.inventoryLocation : inventoryLocation // ignore: cast_nullable_to_non_nullable
+as InventoryBalanceLocationDto?,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
+as InventoryBalanceProductDto?,
+  ));
+}
+
+/// Create a copy of InventoryBalanceDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InventoryBalanceFarmDtoCopyWith<$Res>? get farm {
+    if (_self.farm == null) {
+    return null;
+  }
+
+  return $InventoryBalanceFarmDtoCopyWith<$Res>(_self.farm!, (value) {
+    return _then(_self.copyWith(farm: value));
+  });
+}/// Create a copy of InventoryBalanceDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InventoryBalanceLocationDtoCopyWith<$Res>? get inventoryLocation {
+    if (_self.inventoryLocation == null) {
+    return null;
+  }
+
+  return $InventoryBalanceLocationDtoCopyWith<$Res>(_self.inventoryLocation!, (value) {
+    return _then(_self.copyWith(inventoryLocation: value));
+  });
+}/// Create a copy of InventoryBalanceDto
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InventoryBalanceProductDtoCopyWith<$Res>? get product {
+    if (_self.product == null) {
+    return null;
+  }
+
+  return $InventoryBalanceProductDtoCopyWith<$Res>(_self.product!, (value) {
+    return _then(_self.copyWith(product: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$InventoryBalanceFarmDto {
+
+ String get id; String get name;
+/// Create a copy of InventoryBalanceFarmDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$InventoryBalanceFarmDtoCopyWith<InventoryBalanceFarmDto> get copyWith => _$InventoryBalanceFarmDtoCopyWithImpl<InventoryBalanceFarmDto>(this as InventoryBalanceFarmDto, _$identity);
+
+  /// Serializes this InventoryBalanceFarmDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryBalanceFarmDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'InventoryBalanceFarmDto(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $InventoryBalanceFarmDtoCopyWith<$Res>  {
+  factory $InventoryBalanceFarmDtoCopyWith(InventoryBalanceFarmDto value, $Res Function(InventoryBalanceFarmDto) _then) = _$InventoryBalanceFarmDtoCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$InventoryBalanceFarmDtoCopyWithImpl<$Res>
+    implements $InventoryBalanceFarmDtoCopyWith<$Res> {
+  _$InventoryBalanceFarmDtoCopyWithImpl(this._self, this._then);
+
+  final InventoryBalanceFarmDto _self;
+  final $Res Function(InventoryBalanceFarmDto) _then;
+
+/// Create a copy of InventoryBalanceFarmDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [InventoryBalanceFarmDto].
+extension InventoryBalanceFarmDtoPatterns on InventoryBalanceFarmDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _InventoryBalanceFarmDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceFarmDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _InventoryBalanceFarmDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceFarmDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _InventoryBalanceFarmDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceFarmDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _InventoryBalanceFarmDto() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _InventoryBalanceFarmDto():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _InventoryBalanceFarmDto() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _InventoryBalanceFarmDto implements InventoryBalanceFarmDto {
+  const _InventoryBalanceFarmDto({required this.id, required this.name});
+  factory _InventoryBalanceFarmDto.fromJson(Map<String, dynamic> json) => _$InventoryBalanceFarmDtoFromJson(json);
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of InventoryBalanceFarmDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$InventoryBalanceFarmDtoCopyWith<_InventoryBalanceFarmDto> get copyWith => __$InventoryBalanceFarmDtoCopyWithImpl<_InventoryBalanceFarmDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$InventoryBalanceFarmDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryBalanceFarmDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'InventoryBalanceFarmDto(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$InventoryBalanceFarmDtoCopyWith<$Res> implements $InventoryBalanceFarmDtoCopyWith<$Res> {
+  factory _$InventoryBalanceFarmDtoCopyWith(_InventoryBalanceFarmDto value, $Res Function(_InventoryBalanceFarmDto) _then) = __$InventoryBalanceFarmDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$InventoryBalanceFarmDtoCopyWithImpl<$Res>
+    implements _$InventoryBalanceFarmDtoCopyWith<$Res> {
+  __$InventoryBalanceFarmDtoCopyWithImpl(this._self, this._then);
+
+  final _InventoryBalanceFarmDto _self;
+  final $Res Function(_InventoryBalanceFarmDto) _then;
+
+/// Create a copy of InventoryBalanceFarmDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_InventoryBalanceFarmDto(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$InventoryBalanceLocationDto {
+
+ String get id; String get name;
+/// Create a copy of InventoryBalanceLocationDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$InventoryBalanceLocationDtoCopyWith<InventoryBalanceLocationDto> get copyWith => _$InventoryBalanceLocationDtoCopyWithImpl<InventoryBalanceLocationDto>(this as InventoryBalanceLocationDto, _$identity);
+
+  /// Serializes this InventoryBalanceLocationDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryBalanceLocationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'InventoryBalanceLocationDto(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $InventoryBalanceLocationDtoCopyWith<$Res>  {
+  factory $InventoryBalanceLocationDtoCopyWith(InventoryBalanceLocationDto value, $Res Function(InventoryBalanceLocationDto) _then) = _$InventoryBalanceLocationDtoCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$InventoryBalanceLocationDtoCopyWithImpl<$Res>
+    implements $InventoryBalanceLocationDtoCopyWith<$Res> {
+  _$InventoryBalanceLocationDtoCopyWithImpl(this._self, this._then);
+
+  final InventoryBalanceLocationDto _self;
+  final $Res Function(InventoryBalanceLocationDto) _then;
+
+/// Create a copy of InventoryBalanceLocationDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [InventoryBalanceLocationDto].
+extension InventoryBalanceLocationDtoPatterns on InventoryBalanceLocationDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _InventoryBalanceLocationDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceLocationDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _InventoryBalanceLocationDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceLocationDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _InventoryBalanceLocationDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceLocationDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _InventoryBalanceLocationDto() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _InventoryBalanceLocationDto():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _InventoryBalanceLocationDto() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _InventoryBalanceLocationDto implements InventoryBalanceLocationDto {
+  const _InventoryBalanceLocationDto({required this.id, required this.name});
+  factory _InventoryBalanceLocationDto.fromJson(Map<String, dynamic> json) => _$InventoryBalanceLocationDtoFromJson(json);
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of InventoryBalanceLocationDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$InventoryBalanceLocationDtoCopyWith<_InventoryBalanceLocationDto> get copyWith => __$InventoryBalanceLocationDtoCopyWithImpl<_InventoryBalanceLocationDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$InventoryBalanceLocationDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryBalanceLocationDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'InventoryBalanceLocationDto(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$InventoryBalanceLocationDtoCopyWith<$Res> implements $InventoryBalanceLocationDtoCopyWith<$Res> {
+  factory _$InventoryBalanceLocationDtoCopyWith(_InventoryBalanceLocationDto value, $Res Function(_InventoryBalanceLocationDto) _then) = __$InventoryBalanceLocationDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$InventoryBalanceLocationDtoCopyWithImpl<$Res>
+    implements _$InventoryBalanceLocationDtoCopyWith<$Res> {
+  __$InventoryBalanceLocationDtoCopyWithImpl(this._self, this._then);
+
+  final _InventoryBalanceLocationDto _self;
+  final $Res Function(_InventoryBalanceLocationDto) _then;
+
+/// Create a copy of InventoryBalanceLocationDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_InventoryBalanceLocationDto(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$InventoryBalanceProductDto {
+
+ String get id; String get name; String? get code;
+/// Create a copy of InventoryBalanceProductDto
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$InventoryBalanceProductDtoCopyWith<InventoryBalanceProductDto> get copyWith => _$InventoryBalanceProductDtoCopyWithImpl<InventoryBalanceProductDto>(this as InventoryBalanceProductDto, _$identity);
+
+  /// Serializes this InventoryBalanceProductDto to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is InventoryBalanceProductDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.code, code) || other.code == code));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,code);
+
+@override
+String toString() {
+  return 'InventoryBalanceProductDto(id: $id, name: $name, code: $code)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $InventoryBalanceProductDtoCopyWith<$Res>  {
+  factory $InventoryBalanceProductDtoCopyWith(InventoryBalanceProductDto value, $Res Function(InventoryBalanceProductDto) _then) = _$InventoryBalanceProductDtoCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name, String? code
+});
+
+
+
+
+}
+/// @nodoc
+class _$InventoryBalanceProductDtoCopyWithImpl<$Res>
+    implements $InventoryBalanceProductDtoCopyWith<$Res> {
+  _$InventoryBalanceProductDtoCopyWithImpl(this._self, this._then);
+
+  final InventoryBalanceProductDto _self;
+  final $Res Function(InventoryBalanceProductDto) _then;
+
+/// Create a copy of InventoryBalanceProductDto
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? code = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [InventoryBalanceProductDto].
+extension InventoryBalanceProductDtoPatterns on InventoryBalanceProductDto {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _InventoryBalanceProductDto value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceProductDto() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _InventoryBalanceProductDto value)  $default,){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceProductDto():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _InventoryBalanceProductDto value)?  $default,){
+final _that = this;
+switch (_that) {
+case _InventoryBalanceProductDto() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? code)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _InventoryBalanceProductDto() when $default != null:
+return $default(_that.id,_that.name,_that.code);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? code)  $default,) {final _that = this;
+switch (_that) {
+case _InventoryBalanceProductDto():
+return $default(_that.id,_that.name,_that.code);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? code)?  $default,) {final _that = this;
+switch (_that) {
+case _InventoryBalanceProductDto() when $default != null:
+return $default(_that.id,_that.name,_that.code);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _InventoryBalanceProductDto implements InventoryBalanceProductDto {
+  const _InventoryBalanceProductDto({required this.id, required this.name, this.code});
+  factory _InventoryBalanceProductDto.fromJson(Map<String, dynamic> json) => _$InventoryBalanceProductDtoFromJson(json);
+
+@override final  String id;
+@override final  String name;
+@override final  String? code;
+
+/// Create a copy of InventoryBalanceProductDto
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$InventoryBalanceProductDtoCopyWith<_InventoryBalanceProductDto> get copyWith => __$InventoryBalanceProductDtoCopyWithImpl<_InventoryBalanceProductDto>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$InventoryBalanceProductDtoToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _InventoryBalanceProductDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.code, code) || other.code == code));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name,code);
+
+@override
+String toString() {
+  return 'InventoryBalanceProductDto(id: $id, name: $name, code: $code)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$InventoryBalanceProductDtoCopyWith<$Res> implements $InventoryBalanceProductDtoCopyWith<$Res> {
+  factory _$InventoryBalanceProductDtoCopyWith(_InventoryBalanceProductDto value, $Res Function(_InventoryBalanceProductDto) _then) = __$InventoryBalanceProductDtoCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name, String? code
+});
+
+
+
+
+}
+/// @nodoc
+class __$InventoryBalanceProductDtoCopyWithImpl<$Res>
+    implements _$InventoryBalanceProductDtoCopyWith<$Res> {
+  __$InventoryBalanceProductDtoCopyWithImpl(this._self, this._then);
+
+  final _InventoryBalanceProductDto _self;
+  final $Res Function(_InventoryBalanceProductDto) _then;
+
+/// Create a copy of InventoryBalanceProductDto
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? code = freezed,}) {
+  return _then(_InventoryBalanceProductDto(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,code: freezed == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

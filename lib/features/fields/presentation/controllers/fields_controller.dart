@@ -8,15 +8,28 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:field_management_app/core/utils/debug_log.dart';
 
 class FieldsFilter {
-  const FieldsFilter({this.farmId, this.search, this.active = true});
+  static const sessionFarm = '__session_farm__';
+  static const allFarms = '__all_farms__';
+
+  const FieldsFilter({
+    this.farmId = sessionFarm,
+    this.search,
+    this.active = true,
+  });
 
   final String? farmId;
   final String? search;
   final bool? active;
 
-  FieldsFilter copyWith({String? farmId, String? search, bool? active}) {
+  static const _sentinel = Object();
+
+  FieldsFilter copyWith({
+    Object? farmId = _sentinel,
+    String? search,
+    bool? active,
+  }) {
     return FieldsFilter(
-      farmId: farmId ?? this.farmId,
+      farmId: identical(farmId, _sentinel) ? this.farmId : farmId as String?,
       search: search ?? this.search,
       active: active ?? this.active,
     );
@@ -69,7 +82,7 @@ class FieldsInfiniteListController
       final page = await useCase.page(
         page: current.page + 1,
         limit: _pageSize,
-        farmId: filter.farmId ?? selectedFarmId,
+        farmId: _resolveFarmId(filter, selectedFarmId),
         active: filter.active,
         search: filter.search,
       );
@@ -101,7 +114,7 @@ class FieldsInfiniteListController
     final page = await useCase.page(
       page: 1,
       limit: _pageSize,
-      farmId: filter.farmId ?? selectedFarmId,
+      farmId: _resolveFarmId(filter, selectedFarmId),
       active: filter.active,
       search: filter.search,
     );
@@ -111,6 +124,17 @@ class FieldsInfiniteListController
       page: page.page,
       hasNextPage: page.hasNextPage,
     );
+  }
+
+  String? _resolveFarmId(FieldsFilter filter, String? selectedFarmId) {
+    final farmId = filter.farmId;
+    if (farmId == FieldsFilter.allFarms) {
+      return null;
+    }
+    if (farmId == null || farmId == FieldsFilter.sessionFarm) {
+      return selectedFarmId;
+    }
+    return farmId;
   }
 }
 

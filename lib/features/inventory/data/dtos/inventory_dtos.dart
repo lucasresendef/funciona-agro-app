@@ -85,10 +85,47 @@ abstract class InventoryBalanceDto with _$InventoryBalanceDto {
     required String productId,
     @DoubleConverter() required double quantity,
     @DoubleConverter() required double averageUnitCost,
+    InventoryBalanceFarmDto? farm,
+    InventoryBalanceLocationDto? inventoryLocation,
+    InventoryBalanceProductDto? product,
   }) = _InventoryBalanceDto;
 
   factory InventoryBalanceDto.fromJson(Map<String, dynamic> json) =>
       _$InventoryBalanceDtoFromJson(json);
+}
+
+@freezed
+abstract class InventoryBalanceFarmDto with _$InventoryBalanceFarmDto {
+  const factory InventoryBalanceFarmDto({
+    required String id,
+    required String name,
+  }) = _InventoryBalanceFarmDto;
+
+  factory InventoryBalanceFarmDto.fromJson(Map<String, dynamic> json) =>
+      _$InventoryBalanceFarmDtoFromJson(json);
+}
+
+@freezed
+abstract class InventoryBalanceLocationDto with _$InventoryBalanceLocationDto {
+  const factory InventoryBalanceLocationDto({
+    required String id,
+    required String name,
+  }) = _InventoryBalanceLocationDto;
+
+  factory InventoryBalanceLocationDto.fromJson(Map<String, dynamic> json) =>
+      _$InventoryBalanceLocationDtoFromJson(json);
+}
+
+@freezed
+abstract class InventoryBalanceProductDto with _$InventoryBalanceProductDto {
+  const factory InventoryBalanceProductDto({
+    required String id,
+    required String name,
+    String? code,
+  }) = _InventoryBalanceProductDto;
+
+  factory InventoryBalanceProductDto.fromJson(Map<String, dynamic> json) =>
+      _$InventoryBalanceProductDtoFromJson(json);
 }
 
 @freezed

@@ -9,12 +9,14 @@ class AppSearchBar extends StatefulWidget {
     super.key,
     this.initialValue,
     this.hintText = 'Buscar',
+    this.actions = const [],
     this.trailing = const [],
   });
 
   final String? initialValue;
   final String hintText;
   final ValueChanged<String> onChanged;
+  final List<Widget> actions;
   final List<Widget> trailing;
 
   @override
@@ -22,6 +24,32 @@ class AppSearchBar extends StatefulWidget {
 }
 
 class _AppSearchBarState extends State<AppSearchBar> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue ?? '');
+  }
+
+  @override
+  void didUpdateWidget(covariant AppSearchBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextValue = widget.initialValue ?? '';
+    if (_controller.text != nextValue) {
+      _controller.value = TextEditingValue(
+        text: nextValue,
+        selection: TextSelection.collapsed(offset: nextValue.length),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Widget _normalizeTrailingWidget(Widget widget) {
     if (widget is Expanded) return widget.child;
     if (widget is Flexible) return widget.child;
@@ -35,6 +63,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
     if (widget is Flexible) {
       return _normalizeSheetFilterWidget(widget.child);
     }
+    return widget;
+  }
+
+  Widget _normalizeActionWidget(Widget widget) {
+    if (widget is Expanded) return widget.child;
+    if (widget is Flexible) return widget.child;
     return widget;
   }
 
@@ -91,11 +125,12 @@ class _AppSearchBarState extends State<AppSearchBar> {
   @override
   Widget build(BuildContext context) {
     final isCompact = AppLayout.isCompact(context);
+    final normalizedActions = widget.actions.map(_normalizeActionWidget).toList();
     final normalizedTrailing = widget.trailing
         .map(_normalizeTrailingWidget)
         .toList();
     final searchField = TextFormField(
-      initialValue: widget.initialValue,
+      controller: _controller,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
         labelText: isCompact ? null : 'Busca',
@@ -119,6 +154,10 @@ class _AppSearchBarState extends State<AppSearchBar> {
                 icon: const Icon(Icons.tune_rounded),
               ),
             ],
+            if (normalizedActions.isNotEmpty) ...[
+              const SizedBox(width: AppSpacing.xs),
+              ...normalizedActions,
+            ],
           ],
         ),
       );
@@ -135,6 +174,10 @@ class _AppSearchBarState extends State<AppSearchBar> {
               constraints: const BoxConstraints(maxWidth: 260),
               child: normalizedTrailing.first,
             ),
+            if (normalizedActions.isNotEmpty) ...[
+              const SizedBox(width: AppSpacing.md),
+              ...normalizedActions,
+            ],
           ],
         ),
       );
@@ -144,22 +187,44 @@ class _AppSearchBarState extends State<AppSearchBar> {
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         children: [
-          searchField,
+          Row(
+            children: [
+              Expanded(child: searchField),
+            ],
+          ),
           if (normalizedTrailing.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: normalizedTrailing
-                  .map(
-                    (child) => ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: AppLayout.formFieldWidth(context, 320),
-                      ),
-                      child: child,
-                    ),
-                  )
-                  .toList(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: normalizedTrailing
+                        .map(
+                          (child) => ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: AppLayout.formFieldWidth(context, 320),
+                            ),
+                            child: child,
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+                if (normalizedActions.isNotEmpty) ...[
+                  const SizedBox(width: AppSpacing.md),
+                  ...normalizedActions,
+                ],
+              ],
+            ),
+          ],
+          if (normalizedTrailing.isEmpty && normalizedActions.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: normalizedActions,
             ),
           ],
         ],

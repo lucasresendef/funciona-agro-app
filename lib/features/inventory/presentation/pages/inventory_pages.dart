@@ -37,6 +37,8 @@ class InventoryLocationsPage extends ConsumerWidget {
     final locationsAsync = ref.watch(inventoryLocationsInfiniteListProvider);
     final filter = ref.watch(inventoryLocationsFilterProvider);
     final isAdmin = ref.watch(isAdminProvider);
+    final hasActiveFilters =
+        (filter.search?.trim().isNotEmpty ?? false) || filter.active != true;
 
     return AppPage(
       title: 'Locais de estoque',
@@ -53,6 +55,18 @@ class InventoryLocationsPage extends ConsumerWidget {
           AppSearchBar(
             initialValue: filter.search,
             hintText: 'Buscar por nome ou descrição',
+            actions: [
+              IconButton.filledTonal(
+                tooltip: 'Limpar filtros',
+                onPressed: hasActiveFilters
+                    ? () {
+                        ref.read(inventoryLocationsFilterProvider.notifier).state =
+                            const InventoryLocationsFilter();
+                      }
+                    : null,
+                icon: const Icon(Icons.filter_alt_off_rounded),
+              ),
+            ],
             onChanged: (value) {
               ref.read(inventoryLocationsFilterProvider.notifier).state = filter
                   .copyWith(search: value);
@@ -444,19 +458,15 @@ class InventoryBalancePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final balancesAsync = ref.watch(inventoryBalancesInfiniteListProvider);
-    final productsAsync = ref.watch(allActiveProductsProvider);
     final filter = ref.watch(inventoryBalanceFilterProvider);
     final selectedFarmId = ref.watch(sessionManagerProvider).selectedFarmId;
-    final productNameById = productsAsync.maybeWhen(
-      data: (products) => <String, String>{
-        for (final product in products) product.metadata.id: product.name,
-      },
-      orElse: () => const <String, String>{},
+    final balancesAsync = ref.watch(
+      inventoryBalancesByFarmProvider(selectedFarmId),
     );
-    final locationsAsync = ref.watch(
-      inventoryLocationsByFarmProvider(selectedFarmId),
-    );
+    final hasActiveFilters =
+        (filter.search?.trim().isNotEmpty ?? false) ||
+        filter.inventoryLocationId != null ||
+        filter.productId != null;
 
     return AppPage(
       title: 'Saldos de estoque',
@@ -473,9 +483,13 @@ class InventoryBalancePage extends ConsumerWidget {
       child: Column(
         children: [
           InventoryBalanceFiltersBar(
-            locationsAsync: locationsAsync,
-            productsAsync: productsAsync,
+            balanceOptionsAsync: balancesAsync,
             filter: filter,
+            hasActiveFilters: hasActiveFilters,
+            onClearFilters: () {
+              ref.read(inventoryBalanceFilterProvider.notifier).state =
+                  const InventoryBalanceFilter();
+            },
             onSearchChanged: (value) {
               ref.read(inventoryBalanceFilterProvider.notifier).state = filter
                   .copyWith(search: value);
@@ -491,44 +505,54 @@ class InventoryBalancePage extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
-            child: balancesAsync.when(
-              data: (listState) {
+            child: selectedFarmId == null
+                ? const EmptyStateView(
+                    title: 'Nenhuma fazenda selecionada',
+                    message:
+                        'Selecione uma fazenda para mostrar o saldo de estoque.',
+                  )
+                : balancesAsync.when(
+                    data: (balances) {
                 final items = filterInventoryBalancesBySearch(
-                  listState.items,
-                  productNameById: productNameById,
+                  balances,
                   search: filter.search,
+                  inventoryLocationId: filter.inventoryLocationId,
+                  productId: filter.productId,
                 );
                 if (items.isEmpty) {
                   return EmptyStateView(
                     title: 'Nenhum saldo encontrado',
-                    message: (filter.search?.trim().isNotEmpty ?? false)
-                        ? 'Nenhum saldo corresponde ao termo pesquisado.'
+                    message:
+                        (filter.search?.trim().isNotEmpty ?? false) ||
+                            filter.inventoryLocationId != null ||
+                            filter.productId != null
+                        ? 'Nenhum saldo corresponde aos filtros informados.'
                         : 'Registre o primeiro ajuste para materializar a posição de estoque.',
                   );
                 }
 
-                return InfiniteScrollListView<InventoryBalance>(
-                  items: items,
-                  isLoadingMore: listState.isLoadingMore,
-                  onRefresh: () => ref
-                      .read(inventoryBalancesInfiniteListProvider.notifier)
-                      .refreshList(),
-                  onLoadMore: () => ref
-                      .read(inventoryBalancesInfiniteListProvider.notifier)
-                      .loadMore(),
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.sm),
-                  itemBuilder: (context, balance, _) => _InventoryBalanceTile(
-                    balance: balance,
-                    productName: productNameById[balance.productId],
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(inventoryBalancesByFarmProvider(selectedFarmId));
+                    await ref.read(
+                      inventoryBalancesByFarmProvider(selectedFarmId).future,
+                    );
+                  },
+                  child: ListView.separated(
+                    itemCount: items.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) =>
+                        _InventoryBalanceTile(balance: items[index]),
                   ),
                 );
               },
               loading: () => const LoadingStateView(),
               error: (error, _) => ErrorStateView(
                 message: error.toString(),
-                onRetry: () =>
-                    ref.invalidate(inventoryBalancesInfiniteListProvider),
+                onRetry: () => ref.invalidate(
+                  inventoryBalancesByFarmProvider(selectedFarmId),
+                ),
               ),
             ),
           ),
@@ -539,13 +563,15 @@ class InventoryBalancePage extends ConsumerWidget {
 }
 
 class _InventoryBalanceTile extends StatelessWidget {
-  const _InventoryBalanceTile({required this.balance, this.productName});
+  const _InventoryBalanceTile({required this.balance});
 
   final InventoryBalance balance;
-  final String? productName;
 
   @override
   Widget build(BuildContext context) {
+    final productName = balance.product?.name;
+    final locationName = balance.inventoryLocation?.name;
+
     return AppCard(
       child: ListTile(
         contentPadding: EdgeInsets.zero,
@@ -558,6 +584,7 @@ class _InventoryBalanceTile extends StatelessWidget {
               : 'Produto ${balance.productId}',
         ),
         subtitle: Text(
+          '${locationName?.trim().isNotEmpty == true ? '$locationName | ' : ''}'
           'Quantidade: ${AppFormatters.number(balance.quantity)} | Custo médio: ${AppFormatters.currency(balance.averageUnitCost)}',
         ),
         trailing: Chip(

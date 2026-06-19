@@ -60,28 +60,40 @@ Map<String, dynamic> _$CreateInventoryLocationRequestDtoToJson(
   'active': instance.active,
 };
 
-_InventoryBalanceDto _$InventoryBalanceDtoFromJson(Map<String, dynamic> json) =>
-    _InventoryBalanceDto(
-      id: json['id'] as String,
-      active: json['active'] as bool,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
-      createdBy: json['createdBy'] as String?,
-      createdByEmail: json['createdByEmail'] as String?,
-      updatedBy: json['updatedBy'] as String?,
-      updatedByEmail: json['updatedByEmail'] as String?,
-      farmId: json['farmId'] as String,
-      inventoryLocationId: json['inventoryLocationId'] as String,
-      productId: json['productId'] as String,
-      quantity: const DoubleConverter().fromJson(json['quantity']),
-      averageUnitCost: const DoubleConverter().fromJson(
-        json['averageUnitCost'],
-      ),
-    );
+_InventoryBalanceDto _$InventoryBalanceDtoFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceDto(
+  id: json['id'] as String,
+  active: json['active'] as bool,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
+  createdBy: json['createdBy'] as String?,
+  createdByEmail: json['createdByEmail'] as String?,
+  updatedBy: json['updatedBy'] as String?,
+  updatedByEmail: json['updatedByEmail'] as String?,
+  farmId: json['farmId'] as String,
+  inventoryLocationId: json['inventoryLocationId'] as String,
+  productId: json['productId'] as String,
+  quantity: const DoubleConverter().fromJson(json['quantity']),
+  averageUnitCost: const DoubleConverter().fromJson(json['averageUnitCost']),
+  farm: json['farm'] == null
+      ? null
+      : InventoryBalanceFarmDto.fromJson(json['farm'] as Map<String, dynamic>),
+  inventoryLocation: json['inventoryLocation'] == null
+      ? null
+      : InventoryBalanceLocationDto.fromJson(
+          json['inventoryLocation'] as Map<String, dynamic>,
+        ),
+  product: json['product'] == null
+      ? null
+      : InventoryBalanceProductDto.fromJson(
+          json['product'] as Map<String, dynamic>,
+        ),
+);
 
 Map<String, dynamic> _$InventoryBalanceDtoToJson(
   _InventoryBalanceDto instance,
@@ -99,6 +111,47 @@ Map<String, dynamic> _$InventoryBalanceDtoToJson(
   'productId': instance.productId,
   'quantity': const DoubleConverter().toJson(instance.quantity),
   'averageUnitCost': const DoubleConverter().toJson(instance.averageUnitCost),
+  'farm': instance.farm,
+  'inventoryLocation': instance.inventoryLocation,
+  'product': instance.product,
+};
+
+_InventoryBalanceFarmDto _$InventoryBalanceFarmDtoFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceFarmDto(
+  id: json['id'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$InventoryBalanceFarmDtoToJson(
+  _InventoryBalanceFarmDto instance,
+) => <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+_InventoryBalanceLocationDto _$InventoryBalanceLocationDtoFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceLocationDto(
+  id: json['id'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$InventoryBalanceLocationDtoToJson(
+  _InventoryBalanceLocationDto instance,
+) => <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+_InventoryBalanceProductDto _$InventoryBalanceProductDtoFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceProductDto(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  code: json['code'] as String?,
+);
+
+Map<String, dynamic> _$InventoryBalanceProductDtoToJson(
+  _InventoryBalanceProductDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'code': instance.code,
 };
 
 _CreateInventoryBalanceRequestDto _$CreateInventoryBalanceRequestDtoFromJson(

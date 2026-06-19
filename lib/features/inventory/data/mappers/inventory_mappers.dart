@@ -51,6 +51,22 @@ extension InventoryBalanceDtoMapper on InventoryBalanceDto {
       productId: productId,
       quantity: quantity,
       averageUnitCost: averageUnitCost,
+      farm: farm == null
+          ? null
+          : InventoryBalanceFarmRef(id: farm!.id, name: farm!.name),
+      inventoryLocation: inventoryLocation == null
+          ? null
+          : InventoryBalanceLocationRef(
+              id: inventoryLocation!.id,
+              name: inventoryLocation!.name,
+            ),
+      product: product == null
+          ? null
+          : InventoryBalanceProductRef(
+              id: product!.id,
+              name: product!.name,
+              code: product!.code,
+            ),
     );
   }
 }

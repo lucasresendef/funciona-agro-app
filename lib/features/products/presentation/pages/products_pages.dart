@@ -35,6 +35,10 @@ class ProductsPage extends ConsumerWidget {
     final productsAsync = ref.watch(productsInfiniteListProvider);
     final filter = ref.watch(productsFilterProvider);
     final isAdmin = ref.watch(isAdminProvider);
+    final hasActiveFilters =
+        (filter.search?.trim().isNotEmpty ?? false) ||
+        (filter.category?.trim().isNotEmpty ?? false) ||
+        filter.active != true;
 
     return AppPage(
       title: 'Produtos',
@@ -51,6 +55,18 @@ class ProductsPage extends ConsumerWidget {
           AppSearchBar(
             initialValue: filter.search,
             hintText: 'Buscar por nome, código ou categoria',
+            actions: [
+              IconButton.filledTonal(
+                tooltip: 'Limpar filtros',
+                onPressed: hasActiveFilters
+                    ? () {
+                        ref.read(productsFilterProvider.notifier).state =
+                            const ProductsFilter();
+                      }
+                    : null,
+                icon: const Icon(Icons.filter_alt_off_rounded),
+              ),
+            ],
             onChanged: (value) {
               ref.read(productsFilterProvider.notifier).state = filter.copyWith(
                 search: value,
@@ -60,6 +76,7 @@ class ProductsPage extends ConsumerWidget {
               SizedBox(
                 width: AppLayout.formFieldWidth(context, 240),
                 child: TextFormField(
+                  key: ValueKey(filter.category ?? ''),
                   initialValue: filter.category,
                   decoration: const InputDecoration(
                     labelText: 'Categoria',

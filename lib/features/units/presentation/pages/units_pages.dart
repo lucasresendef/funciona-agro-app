@@ -27,6 +27,8 @@ class UnitsPage extends ConsumerWidget {
     final unitsAsync = ref.watch(unitsInfiniteListProvider);
     final filter = ref.watch(unitsFilterProvider);
     final isAdmin = ref.watch(isAdminProvider);
+    final hasActiveFilters =
+        (filter.search?.trim().isNotEmpty ?? false) || filter.active != true;
 
     return AppPage(
       title: 'Unidades',
@@ -46,6 +48,18 @@ class UnitsPage extends ConsumerWidget {
           AppSearchBar(
             hintText: 'Buscar unidade por nome ou símbolo',
             initialValue: filter.search,
+            actions: [
+              IconButton.filledTonal(
+                tooltip: 'Limpar filtros',
+                onPressed: hasActiveFilters
+                    ? () {
+                        ref.read(unitsFilterProvider.notifier).state =
+                            const UnitsFilter();
+                      }
+                    : null,
+                icon: const Icon(Icons.filter_alt_off_rounded),
+              ),
+            ],
             onChanged: (value) {
               ref.read(unitsFilterProvider.notifier).state = filter.copyWith(
                 search: value.trim().isEmpty ? null : value,

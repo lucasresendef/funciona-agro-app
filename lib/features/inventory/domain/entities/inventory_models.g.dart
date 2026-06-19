@@ -62,17 +62,29 @@ Map<String, dynamic> _$UpdateInventoryLocationInputToJson(
   'active': instance.active,
 };
 
-_InventoryBalance _$InventoryBalanceFromJson(Map<String, dynamic> json) =>
-    _InventoryBalance(
-      metadata: AuditMetadata.fromJson(
-        json['metadata'] as Map<String, dynamic>,
-      ),
-      farmId: json['farmId'] as String,
-      inventoryLocationId: json['inventoryLocationId'] as String,
-      productId: json['productId'] as String,
-      quantity: (json['quantity'] as num).toDouble(),
-      averageUnitCost: (json['averageUnitCost'] as num).toDouble(),
-    );
+_InventoryBalance _$InventoryBalanceFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalance(
+  metadata: AuditMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+  farmId: json['farmId'] as String,
+  inventoryLocationId: json['inventoryLocationId'] as String,
+  productId: json['productId'] as String,
+  quantity: (json['quantity'] as num).toDouble(),
+  averageUnitCost: (json['averageUnitCost'] as num).toDouble(),
+  farm: json['farm'] == null
+      ? null
+      : InventoryBalanceFarmRef.fromJson(json['farm'] as Map<String, dynamic>),
+  inventoryLocation: json['inventoryLocation'] == null
+      ? null
+      : InventoryBalanceLocationRef.fromJson(
+          json['inventoryLocation'] as Map<String, dynamic>,
+        ),
+  product: json['product'] == null
+      ? null
+      : InventoryBalanceProductRef.fromJson(
+          json['product'] as Map<String, dynamic>,
+        ),
+);
 
 Map<String, dynamic> _$InventoryBalanceToJson(_InventoryBalance instance) =>
     <String, dynamic>{
@@ -82,7 +94,48 @@ Map<String, dynamic> _$InventoryBalanceToJson(_InventoryBalance instance) =>
       'productId': instance.productId,
       'quantity': instance.quantity,
       'averageUnitCost': instance.averageUnitCost,
+      'farm': instance.farm,
+      'inventoryLocation': instance.inventoryLocation,
+      'product': instance.product,
     };
+
+_InventoryBalanceFarmRef _$InventoryBalanceFarmRefFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceFarmRef(
+  id: json['id'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$InventoryBalanceFarmRefToJson(
+  _InventoryBalanceFarmRef instance,
+) => <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+_InventoryBalanceLocationRef _$InventoryBalanceLocationRefFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceLocationRef(
+  id: json['id'] as String,
+  name: json['name'] as String,
+);
+
+Map<String, dynamic> _$InventoryBalanceLocationRefToJson(
+  _InventoryBalanceLocationRef instance,
+) => <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+_InventoryBalanceProductRef _$InventoryBalanceProductRefFromJson(
+  Map<String, dynamic> json,
+) => _InventoryBalanceProductRef(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  code: json['code'] as String?,
+);
+
+Map<String, dynamic> _$InventoryBalanceProductRefToJson(
+  _InventoryBalanceProductRef instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'code': instance.code,
+};
 
 _CreateInventoryBalanceInput _$CreateInventoryBalanceInputFromJson(
   Map<String, dynamic> json,

@@ -56,10 +56,47 @@ abstract class InventoryBalance with _$InventoryBalance {
     required String productId,
     required double quantity,
     required double averageUnitCost,
+    InventoryBalanceFarmRef? farm,
+    InventoryBalanceLocationRef? inventoryLocation,
+    InventoryBalanceProductRef? product,
   }) = _InventoryBalance;
 
   factory InventoryBalance.fromJson(Map<String, dynamic> json) =>
       _$InventoryBalanceFromJson(json);
+}
+
+@freezed
+abstract class InventoryBalanceFarmRef with _$InventoryBalanceFarmRef {
+  const factory InventoryBalanceFarmRef({
+    required String id,
+    required String name,
+  }) = _InventoryBalanceFarmRef;
+
+  factory InventoryBalanceFarmRef.fromJson(Map<String, dynamic> json) =>
+      _$InventoryBalanceFarmRefFromJson(json);
+}
+
+@freezed
+abstract class InventoryBalanceLocationRef with _$InventoryBalanceLocationRef {
+  const factory InventoryBalanceLocationRef({
+    required String id,
+    required String name,
+  }) = _InventoryBalanceLocationRef;
+
+  factory InventoryBalanceLocationRef.fromJson(Map<String, dynamic> json) =>
+      _$InventoryBalanceLocationRefFromJson(json);
+}
+
+@freezed
+abstract class InventoryBalanceProductRef with _$InventoryBalanceProductRef {
+  const factory InventoryBalanceProductRef({
+    required String id,
+    required String name,
+    String? code,
+  }) = _InventoryBalanceProductRef;
+
+  factory InventoryBalanceProductRef.fromJson(Map<String, dynamic> json) =>
+      _$InventoryBalanceProductRefFromJson(json);
 }
 
 @freezed
