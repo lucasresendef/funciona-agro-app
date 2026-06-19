@@ -10,6 +10,7 @@ class InventoryBalanceFiltersBar extends StatelessWidget {
     required this.locationsAsync,
     required this.productsAsync,
     required this.filter,
+    required this.onSearchChanged,
     required this.onLocationChanged,
     required this.onProductChanged,
     super.key,
@@ -18,14 +19,16 @@ class InventoryBalanceFiltersBar extends StatelessWidget {
   final AsyncValue<List<InventoryLocation>> locationsAsync;
   final AsyncValue<List<Product>> productsAsync;
   final InventoryBalanceFilter filter;
+  final ValueChanged<String> onSearchChanged;
   final ValueChanged<String?> onLocationChanged;
   final ValueChanged<String?> onProductChanged;
 
   @override
   Widget build(BuildContext context) {
     return AppSearchBar(
+      initialValue: filter.search,
       hintText: 'Use os filtros para navegar pelos saldos',
-      onChanged: (_) {},
+      onChanged: onSearchChanged,
       trailing: [
         locationsAsync.maybeWhen(
           data: (locations) => DropdownButtonFormField<String?>(

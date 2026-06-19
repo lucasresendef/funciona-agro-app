@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:field_management_app/core/utils/decimal_input.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_search_bar.dart';
 import 'package:field_management_app/design_system/components/async_state_views.dart';
@@ -66,8 +67,7 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
       if (!mounted) {
         return;
       }
-      final availableProducts = result.data
-          .toList()
+      final availableProducts = result.data.toList()
         ..sort((a, b) {
           final aAvailable = widget.availableByProduct[a.metadata.id] ?? 0;
           final bAvailable = widget.availableByProduct[b.metadata.id] ?? 0;
@@ -119,8 +119,7 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
       if (!mounted) {
         return;
       }
-      final availableProducts = result.data
-          .toList()
+      final availableProducts = result.data.toList()
         ..sort((a, b) {
           final aAvailable = widget.availableByProduct[a.metadata.id] ?? 0;
           final bAvailable = widget.availableByProduct[b.metadata.id] ?? 0;
@@ -212,7 +211,7 @@ class _ProductPickerSheetState extends ConsumerState<ProductPickerSheet> {
                             title: Text(product.name),
                             subtitle: Text(
                               hasStock
-                                  ? 'Saldo disponível: ${available.toStringAsFixed(2)}'
+                                  ? 'Saldo disponível: ${formatDecimalInput(available)}'
                                   : 'Saldo zerado neste local de estoque',
                             ),
                             trailing: isSelected

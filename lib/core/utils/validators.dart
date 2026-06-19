@@ -1,3 +1,5 @@
+import 'package:field_management_app/core/utils/decimal_input.dart';
+
 abstract final class FormValidators {
   static String? requiredField(String? value, {String label = 'Campo'}) {
     if (value == null || value.trim().isEmpty) {
@@ -27,8 +29,7 @@ abstract final class FormValidators {
       return required;
     }
 
-    final normalized = value!.replaceAll(',', '.');
-    final parsed = double.tryParse(normalized);
+    final parsed = parseDecimalInput(value);
     if (parsed == null) {
       return '$label inválido.';
     }
@@ -46,8 +47,7 @@ abstract final class FormValidators {
       return required;
     }
 
-    final normalized = value!.replaceAll(',', '.');
-    final parsed = double.tryParse(normalized);
+    final parsed = parseDecimalInput(value);
     if (parsed == null) {
       return '$label inválido.';
     }

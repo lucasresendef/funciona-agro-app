@@ -1,6 +1,7 @@
 import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/storage/session_manager.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
+import 'package:field_management_app/core/utils/decimal_input.dart';
 import 'package:field_management_app/core/utils/formatters.dart';
 import 'package:field_management_app/core/utils/validators.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
@@ -18,6 +19,7 @@ import 'package:field_management_app/design_system/foundations/app_spacing.dart'
 import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
 import 'package:field_management_app/features/inventory/domain/entities/inventory_models.dart';
 import 'package:field_management_app/features/inventory/presentation/controllers/inventory_controller.dart';
+import 'package:field_management_app/features/inventory/presentation/utils/inventory_balance_search.dart';
 import 'package:field_management_app/features/inventory/presentation/widgets/inventory_balance_filters_bar.dart';
 import 'package:field_management_app/features/inventory/presentation/widgets/inventory_location_form.dart';
 import 'package:field_management_app/features/products/presentation/controllers/products_controller.dart';
@@ -474,6 +476,10 @@ class InventoryBalancePage extends ConsumerWidget {
             locationsAsync: locationsAsync,
             productsAsync: productsAsync,
             filter: filter,
+            onSearchChanged: (value) {
+              ref.read(inventoryBalanceFilterProvider.notifier).state = filter
+                  .copyWith(search: value);
+            },
             onLocationChanged: (value) {
               ref.read(inventoryBalanceFilterProvider.notifier).state = filter
                   .copyWith(inventoryLocationId: value);
@@ -487,12 +493,17 @@ class InventoryBalancePage extends ConsumerWidget {
           Expanded(
             child: balancesAsync.when(
               data: (listState) {
-                final items = listState.items;
+                final items = filterInventoryBalancesBySearch(
+                  listState.items,
+                  productNameById: productNameById,
+                  search: filter.search,
+                );
                 if (items.isEmpty) {
-                  return const EmptyStateView(
+                  return EmptyStateView(
                     title: 'Nenhum saldo encontrado',
-                    message:
-                        'Registre o primeiro ajuste para materializar a posição de estoque.',
+                    message: (filter.search?.trim().isNotEmpty ?? false)
+                        ? 'Nenhum saldo corresponde ao termo pesquisado.'
+                        : 'Registre o primeiro ajuste para materializar a posição de estoque.',
                   );
                 }
 
@@ -706,9 +717,11 @@ class _CreateInventoryBalancePageState
                       child: AppTextField(
                         controller: _quantityController,
                         label: 'Quantidade',
+                        hintText: 'Ex.: 120,50',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: const [DecimalTextInputFormatter()],
                         validator: (value) => FormValidators.positiveNumber(
                           value,
                           label: 'Quantidade',
@@ -720,10 +733,12 @@ class _CreateInventoryBalancePageState
                       child: AppTextField(
                         controller: _averageCostController,
                         label: 'Custo médio',
+                        hintText: 'Ex.: 69,89',
                         prefixText: 'R\$ ',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: const [DecimalTextInputFormatter()],
                         validator: (value) => FormValidators.positiveNumber(
                           value,
                           label: 'Custo médio',
@@ -773,12 +788,8 @@ class _CreateInventoryBalancePageState
             farmId: _farmId!,
             inventoryLocationId: _inventoryLocationId!,
             productId: _productId!,
-            quantity: double.parse(
-              _quantityController.text.replaceAll(',', '.'),
-            ),
-            averageUnitCost: double.parse(
-              _averageCostController.text.replaceAll(',', '.'),
-            ),
+            quantity: parseDecimalInput(_quantityController.text)!,
+            averageUnitCost: parseDecimalInput(_averageCostController.text)!,
             occurredAt: DateTime.now(),
             notes: _notesController.text.trim().isEmpty
                 ? null

@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:field_management_app/features/farms/presentation/controllers/farms_controller.dart';
+import 'package:field_management_app/features/permissions/domain/entities/farm_user_permission.dart';
+import 'package:field_management_app/features/permissions/presentation/controllers/permissions_controller.dart';
 import 'package:field_management_app/core/storage/session_manager.dart';
 import 'package:field_management_app/core/theme/app_theme.dart';
-import 'package:field_management_app/core/utils/formatters.dart';
 import 'package:field_management_app/design_system/components/app_action_button.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_page.dart';
@@ -293,6 +295,19 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionManagerProvider).session;
     final profile = session?.profile;
+    final keycloakUserId = profile?.user.keycloakUserId;
+    final permissionsAsync = keycloakUserId == null
+        ? const AsyncValue<List<FarmUserPermission>>.data(
+            <FarmUserPermission>[],
+          )
+        : ref.watch(userPermissionsProvider(keycloakUserId));
+    final farmsAsync = ref.watch(allActiveFarmsProvider);
+    final farmNameById = farmsAsync.maybeWhen(
+      data: (farms) => <String, String>{
+        for (final farm in farms) farm.metadata.id: farm.name,
+      },
+      orElse: () => const <String, String>{},
+    );
 
     return AppPage(
       title: 'Perfil autenticado',
@@ -309,118 +324,92 @@ class ProfilePage extends ConsumerWidget {
               title: 'Sem perfil carregado',
               message: 'Faça login novamente para obter os dados autenticados.',
             )
-          : ListView(
-              children: [
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        profile.user.name,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(profile.user.email),
-                      const SizedBox(height: AppSpacing.lg),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
+          : Builder(
+              builder: (context) {
+                final fullName = profile.user.name.trim();
+                final nameParts = fullName
+                    .split(RegExp(r'\s+'))
+                    .where((part) => part.isNotEmpty)
+                    .toList();
+                final firstName = nameParts.isEmpty ? '-' : nameParts.first;
+                final lastName = nameParts.length > 1
+                    ? nameParts.sublist(1).join(' ')
+                    : '-';
+                final permissions = permissionsAsync.maybeWhen(
+                  data: (items) =>
+                      items.isNotEmpty ? items : profile.permissions,
+                  orElse: () => profile.permissions,
+                );
+
+                return ListView(
+                  children: [
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Chip(
-                            label: Text(
-                              'Keycloak ID: ${profile.user.keycloakUserId}',
-                            ),
+                          _ProfileDetailRow(
+                            label: 'Keycloak ID',
+                            value: profile.user.keycloakUserId,
                           ),
-                          Chip(
-                            label: Text(
-                              profile.user.isAdmin
-                                  ? 'Administrador'
-                                  : 'Usuário padrão',
-                            ),
+                          _ProfileDetailRow(label: 'Nome', value: firstName),
+                          _ProfileDetailRow(
+                            label: 'Sobrenome',
+                            value: lastName,
                           ),
-                          if (profile.authUser.preferredUsername != null)
-                            Chip(
-                              label: Text(
-                                'Username: ${profile.authUser.preferredUsername}',
+                          _ProfileDetailRow(
+                            label: 'Username',
+                            value: profile.authUser.preferredUsername ?? '-',
+                          ),
+                          _ProfileDetailRow(
+                            label: 'E-mail',
+                            value: profile.user.email,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Permissões por fazenda',
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          if (permissionsAsync.isLoading && permissions.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: AppSpacing.sm,
+                              ),
+                              child: LinearProgressIndicator(),
+                            )
+                          else if (permissions.isEmpty)
+                            const Text('Nenhuma permissão disponível.')
+                          else
+                            ...permissions.map(
+                              (permission) => ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(
+                                  Icons.verified_user_outlined,
+                                ),
+                                title: Text(
+                                  farmNameById[permission.farmId] ??
+                                      permission.farmId,
+                                ),
+                                subtitle: Text(permission.role.label),
+                                trailing: Chip(
+                                  label: Text(permission.role.label),
+                                ),
                               ),
                             ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Identidade e sessão',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      _ProfileDetailRow(
-                        label: 'Sub',
-                        value: profile.authUser.sub,
-                      ),
-                      _ProfileDetailRow(
-                        label: 'Scope',
-                        value: profile.authUser.scope ?? '-',
-                      ),
-                      _ProfileDetailRow(
-                        label: 'Token expira em',
-                        value: session?.expiresIn == null
-                            ? '-'
-                            : '${session!.expiresIn} segundos',
-                      ),
-                      _ProfileDetailRow(
-                        label: 'Última atualização',
-                        value: AppFormatters.dateTime(
-                          profile.user.metadata.updatedAt,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: profile.authUser.realmRoles
-                            .map((role) => Chip(label: Text(role)))
-                            .toList(),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Permissões por fazenda',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      if (profile.permissions.isEmpty)
-                        const Text('Nenhuma permissão disponível.')
-                      else
-                        ...profile.permissions.map(
-                          (permission) => ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.verified_user_outlined),
-                            title: Text(permission.userName),
-                            subtitle: Text(permission.userEmail),
-                            trailing: Chip(label: Text(permission.role.label)),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                  ],
+                );
+              },
             ),
     );
   }

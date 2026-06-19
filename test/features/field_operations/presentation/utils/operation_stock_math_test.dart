@@ -38,5 +38,46 @@ void main() {
 
       expect(sufficient, isFalse);
     });
+
+    test(
+      'permite consumir o saldo exibido mesmo com arredondamento interno',
+      () {
+        final sufficient = hasSufficientStock(
+          quantitySent: 3,
+          available: 2.995,
+        );
+
+        expect(sufficient, isTrue);
+      },
+    );
+
+    test('bloqueia quantidade acima do saldo após arredondamento', () {
+      final sufficient = hasSufficientStock(quantitySent: 3.01, available: 3);
+
+      expect(sufficient, isFalse);
+    });
+
+    test('nao desconta o proprio item do saldo disponivel', () {
+      final adjusted = availableByProductForItem(
+        baseAvailableByProduct: const {'prod-1': 363},
+        reservations: const [(productId: 'prod-1', quantity: 363)],
+        currentIndex: 0,
+      );
+
+      expect(adjusted['prod-1'], 363);
+    });
+
+    test('desconta apenas os outros itens do mesmo produto', () {
+      final adjusted = availableByProductForItem(
+        baseAvailableByProduct: const {'prod-1': 363},
+        reservations: const [
+          (productId: 'prod-1', quantity: 100),
+          (productId: 'prod-1', quantity: 50),
+        ],
+        currentIndex: 1,
+      );
+
+      expect(adjusted['prod-1'], 263);
+    });
   });
 }

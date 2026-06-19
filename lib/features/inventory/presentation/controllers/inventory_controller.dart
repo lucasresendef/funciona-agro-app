@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:field_management_app/core/utils/debug_log.dart';
 
+const _filterUnset = Object();
+
 class InventoryLocationsFilter {
   const InventoryLocationsFilter({
     this.farmId,
@@ -36,25 +38,33 @@ class InventoryBalanceFilter {
     this.farmId,
     this.inventoryLocationId,
     this.productId,
+    this.search,
     this.active = true,
   });
 
   final String? farmId;
   final String? inventoryLocationId;
   final String? productId;
+  final String? search;
   final bool? active;
 
   InventoryBalanceFilter copyWith({
-    String? farmId,
-    String? inventoryLocationId,
-    String? productId,
-    bool? active,
+    Object? farmId = _filterUnset,
+    Object? inventoryLocationId = _filterUnset,
+    Object? productId = _filterUnset,
+    Object? search = _filterUnset,
+    Object? active = _filterUnset,
   }) {
     return InventoryBalanceFilter(
-      farmId: farmId ?? this.farmId,
-      inventoryLocationId: inventoryLocationId ?? this.inventoryLocationId,
-      productId: productId ?? this.productId,
-      active: active ?? this.active,
+      farmId: identical(farmId, _filterUnset) ? this.farmId : farmId as String?,
+      inventoryLocationId: identical(inventoryLocationId, _filterUnset)
+          ? this.inventoryLocationId
+          : inventoryLocationId as String?,
+      productId: identical(productId, _filterUnset)
+          ? this.productId
+          : productId as String?,
+      search: identical(search, _filterUnset) ? this.search : search as String?,
+      active: identical(active, _filterUnset) ? this.active : active as bool?,
     );
   }
 }
@@ -219,6 +229,7 @@ class InventoryBalancesInfiniteListController
         farmId: filter.farmId ?? selectedFarmId,
         inventoryLocationId: filter.inventoryLocationId,
         productId: filter.productId,
+        search: filter.search,
         active: filter.active,
       );
 
@@ -254,6 +265,7 @@ class InventoryBalancesInfiniteListController
       farmId: filter.farmId ?? selectedFarmId,
       inventoryLocationId: filter.inventoryLocationId,
       productId: filter.productId,
+      search: filter.search,
       active: filter.active,
     );
 

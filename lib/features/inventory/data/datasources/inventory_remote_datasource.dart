@@ -77,6 +77,7 @@ class InventoryRemoteDataSource {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   }) async {
     final payload = await fetchAllPaginatedMaps(
@@ -86,6 +87,7 @@ class InventoryRemoteDataSource {
         'farmId': farmId,
         'inventoryLocationId': inventoryLocationId,
         'productId': productId,
+        'search': search,
         'active': active,
       },
     );
@@ -99,6 +101,7 @@ class InventoryRemoteDataSource {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   }) async {
     final payload = await fetchPaginatedMaps(
@@ -110,6 +113,7 @@ class InventoryRemoteDataSource {
         'farmId': farmId,
         'inventoryLocationId': inventoryLocationId,
         'productId': productId,
+        'search': search,
         'active': active,
       },
     );

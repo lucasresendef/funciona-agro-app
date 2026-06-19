@@ -40,6 +40,17 @@ final permissionsFilterProvider = StateProvider<PermissionsFilter>((ref) {
   return const PermissionsFilter();
 });
 
+final userPermissionsProvider =
+    FutureProvider.family<List<FarmUserPermission>, String>((
+      ref,
+      keycloakUserId,
+    ) async {
+      final useCase = GetPermissionsUseCase(
+        ref.watch(permissionsRepositoryProvider),
+      );
+      return useCase.call(keycloakUserId: keycloakUserId, active: true);
+    });
+
 final permissionsInfiniteListProvider =
     AsyncNotifierProvider<
       PermissionsInfiniteListController,

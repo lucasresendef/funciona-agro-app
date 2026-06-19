@@ -1,5 +1,6 @@
 import 'package:field_management_app/core/storage/session_manager.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
+import 'package:field_management_app/core/utils/decimal_input.dart';
 import 'package:field_management_app/design_system/components/app_action_button.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_destructive.dart';
@@ -395,6 +396,7 @@ class _CreateFieldOperationPageState
   String? _farmId;
   final Set<String> _fieldIds = <String>{};
   String? _inventoryLocationId;
+  String? _validationMessage;
 
   @override
   void initState() {
@@ -432,45 +434,29 @@ class _CreateFieldOperationPageState
     final farmsAsync = ref.watch(allActiveFarmsProvider);
     final fieldsAsync = ref.watch(fieldsByFarmProvider(_farmId));
     final locationsAsync = ref.watch(inventoryLocationsByFarmProvider(_farmId));
-    final productsAsync = ref.watch(allActiveProductsProvider);
-    final availableByProduct = productsAsync.maybeWhen(
-      data: (products) => <String, double>{
-        for (final product in products)
-          product.metadata.id: product.stockByLocation
-              .where(
-                (stock) =>
-                    stock.farmId == _farmId &&
-                    stock.inventoryLocationId == _inventoryLocationId,
-              )
-              .fold<double>(0, (sum, stock) => sum + stock.quantity),
+    final balancesAsync = ref.watch(
+      inventoryBalancesByLocationProvider((
+        farmId: _farmId,
+        inventoryLocationId: _inventoryLocationId,
+      )),
+    );
+    final baseAvailableByProduct = balancesAsync.maybeWhen(
+      data: (balances) => <String, double>{
+        for (final balance in balances)
+          balance.productId: (balance.quantity).clamp(0, double.infinity),
       },
       orElse: () => const <String, double>{},
     );
-    final adjustedAvailableByProduct = Map<String, double>.from(
-      availableByProduct,
-    );
-    for (final item in _items) {
-      if (item.productId != null && item.sentValue > 0) {
-        adjustedAvailableByProduct[item.productId!] =
-            (adjustedAvailableByProduct[item.productId!] ?? 0) - item.sentValue;
-      }
-    }
-    final costByProduct = productsAsync.maybeWhen(
-      data: (products) => <String, double>{
-        for (final product in products)
-          product.metadata.id: (() {
-            final stock = product.stockByLocation
-                .where(
-                  (item) =>
-                      item.farmId == _farmId &&
-                      item.inventoryLocationId == _inventoryLocationId,
-                )
-                .firstOrNull;
-            return stock?.averageUnitCost ?? 0;
-          })(),
+    final costByProduct = balancesAsync.maybeWhen(
+      data: (balances) => <String, double>{
+        for (final balance in balances)
+          balance.productId: balance.averageUnitCost,
       },
       orElse: () => const <String, double>{},
     );
+    final reservations = _items
+        .map((item) => (productId: item.productId, quantity: item.sentValue))
+        .toList();
     final state = ref.watch(createFieldOperationControllerProvider);
 
     return AppPage(
@@ -496,6 +482,7 @@ class _CreateFieldOperationPageState
                         .toList(),
                     onChanged: (value) {
                       setState(() {
+                        _validationMessage = null;
                         _farmId = value;
                         _fieldIds.clear();
                         _inventoryLocationId = null;
@@ -583,10 +570,12 @@ class _CreateFieldOperationPageState
                     onChanged: (value) {
                       if (_fieldIds.isNotEmpty) {
                         setState(() {
+                          _validationMessage = null;
                           _inventoryLocationId = value;
                           for (final item in _items) {
                             item.productId = null;
                             item.productName = null;
+                            item.quantitySentController.clear();
                           }
                         });
                       }
@@ -616,12 +605,13 @@ class _CreateFieldOperationPageState
                     ),
                     const Spacer(),
                     IconButton.filledTonal(
-                      onPressed: () => setState(
-                        () => _items.insert(
+                      onPressed: () => setState(() {
+                        _validationMessage = null;
+                        _items.insert(
                           0,
                           _OperationItemDraft(order: _nextItemOrder++),
-                        ),
-                      ),
+                        );
+                      }),
                       icon: const Icon(Icons.add_rounded),
                     ),
                   ],
@@ -635,55 +625,107 @@ class _CreateFieldOperationPageState
                     ),
                   ),
                 for (var i = 0; i < _items.length; i++) ...[
-                  _OperationItemCard(
-                    label: _items[i].order,
-                    draft: _items[i],
-                    enabled: _inventoryLocationId != null,
-                    availableByProduct: adjustedAvailableByProduct,
-                    onQuantityChanged: () => setState(() {}),
-                    onOpenProductPicker: _inventoryLocationId == null
-                        ? null
-                        : () async {
-                            final withStockCount = adjustedAvailableByProduct
-                                .values
-                                .where((value) => value > 0)
-                                .length;
-                            debugPrint(
-                              '[CreateFieldOperationPage] abrir busca de produtos '
-                              'farmId=$_farmId inventoryLocationId=$_inventoryLocationId '
-                              'availableMapSize=${adjustedAvailableByProduct.length} '
-                              'withPositiveStock=$withStockCount',
-                            );
-                            final selected =
-                                await showModalBottomSheet<Product>(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  showDragHandle: true,
-                                  useSafeArea: true,
-                                  builder: (_) => ProductPickerSheet(
-                                    selectedProductId: _items[i].productId,
-                                    availableByProduct:
-                                        adjustedAvailableByProduct,
-                                  ),
+                  Builder(
+                    builder: (context) {
+                      final itemAvailableByProduct = availableByProductForItem(
+                        baseAvailableByProduct: baseAvailableByProduct,
+                        reservations: reservations,
+                        currentIndex: i,
+                      );
+
+                      return _OperationItemCard(
+                        label: _items[i].order,
+                        draft: _items[i],
+                        enabled: _inventoryLocationId != null,
+                        availableByProduct: itemAvailableByProduct,
+                        onQuantityChanged: () =>
+                            setState(() => _validationMessage = null),
+                        onOpenProductPicker: _inventoryLocationId == null
+                            ? null
+                            : () async {
+                                final withStockCount = itemAvailableByProduct
+                                    .values
+                                    .where((value) => value > 0)
+                                    .length;
+                                debugPrint(
+                                  '[CreateFieldOperationPage] abrir busca de produtos '
+                                  'farmId=$_farmId inventoryLocationId=$_inventoryLocationId '
+                                  'availableMapSize=${itemAvailableByProduct.length} '
+                                  'withPositiveStock=$withStockCount',
                                 );
-                            if (selected == null) {
-                              return;
-                            }
-                            setState(() {
-                              _items[i].productId = selected.metadata.id;
-                              _items[i].productName = selected.name;
-                              final cost = costByProduct[selected.metadata.id];
-                              if (cost != null) {
-                                _items[i].unitCostController.text = cost
-                                    .toStringAsFixed(2);
-                              }
-                            });
-                          },
-                    onRemove: _items.length == 1
-                        ? null
-                        : () => _confirmAndRemoveItem(i),
+                                final selected =
+                                    await showModalBottomSheet<Product>(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      showDragHandle: true,
+                                      useSafeArea: true,
+                                      builder: (_) => ProductPickerSheet(
+                                        selectedProductId: _items[i].productId,
+                                        availableByProduct:
+                                            itemAvailableByProduct,
+                                      ),
+                                    );
+                                if (selected == null) {
+                                  return;
+                                }
+                                setState(() {
+                                  _validationMessage = null;
+                                  _items[i].productId = selected.metadata.id;
+                                  _items[i].productName = selected.name;
+                                  final cost =
+                                      costByProduct[selected.metadata.id];
+                                  if (cost != null) {
+                                    _items[i].unitCostController.text =
+                                        formatDecimalInput(cost);
+                                  }
+                                });
+                              },
+                        onUseMax: () {
+                          final productId = _items[i].productId;
+                          if (productId == null) {
+                            return;
+                          }
+                          final available = itemAvailableByProduct[productId];
+                          debugPrint(
+                            '[CreateFieldOperationPage] usar max '
+                            'item=${_items[i].order} productId=$productId '
+                            'available=$available baseAvailable=${baseAvailableByProduct[productId]} '
+                            'currentQuantity=${_items[i].sentValue}',
+                          );
+                          if (available == null) {
+                            return;
+                          }
+                          setState(() {
+                            _validationMessage = null;
+                            _items[i].quantitySentController.text =
+                                formatDecimalInput(available);
+                          });
+                        },
+                        onRemove: _items.length == 1
+                            ? null
+                            : () => _confirmAndRemoveItem(i),
+                      );
+                    },
                   ),
                   const SizedBox(height: AppSpacing.sm),
+                ],
+                if (_validationMessage != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEECEC),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      border: Border.all(color: const Color(0xFFE67C7C)),
+                    ),
+                    child: Text(
+                      _validationMessage!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF9F3030),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
                 ],
                 const SizedBox(height: AppSpacing.lg),
                 Row(
@@ -710,6 +752,7 @@ class _CreateFieldOperationPageState
   }
 
   void _submit() {
+    setState(() => _validationMessage = null);
     final isFormValid = _formKey.currentState!.validate();
     if (!isFormValid) {
       _showValidationError('Preencha todos os campos obrigatórios.');
@@ -790,9 +833,7 @@ class _CreateFieldOperationPageState
   }
 
   void _showValidationError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    setState(() => _validationMessage = message);
   }
 }
 
@@ -804,6 +845,7 @@ class _OperationItemCard extends StatelessWidget {
     required this.availableByProduct,
     required this.onQuantityChanged,
     this.onOpenProductPicker,
+    this.onUseMax,
     this.onRemove,
   });
 
@@ -813,6 +855,7 @@ class _OperationItemCard extends StatelessWidget {
   final Map<String, double> availableByProduct;
   final VoidCallback onQuantityChanged;
   final VoidCallback? onOpenProductPicker;
+  final VoidCallback? onUseMax;
   final VoidCallback? onRemove;
 
   @override
@@ -898,7 +941,7 @@ class _OperationItemCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Flexible(
                     child: Text(
-                      'Máximo disponível: ${available.toStringAsFixed(2)}',
+                      'Máximo disponível: ${formatDecimalInput(available)}',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: Theme.of(
                           context,
@@ -910,11 +953,21 @@ class _OperationItemCard extends StatelessWidget {
                 ],
               ),
             ),
+          if (available != null && onUseMax != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: onUseMax,
+                child: const Text('Usar máximo'),
+              ),
+            ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
             controller: draft.quantitySentController,
             label: 'Quantidade',
+            hintText: 'Ex.: 3,00',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: const [DecimalTextInputFormatter()],
             onChanged: (value) => onQuantityChanged(),
             validator: (value) =>
                 draft.validateSent(value, available: available),
@@ -923,7 +976,9 @@ class _OperationItemCard extends StatelessWidget {
           AppTextField(
             controller: draft.unitCostController,
             label: 'Custo unitário',
+            hintText: 'Ex.: 69,89',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: const [DecimalTextInputFormatter()],
             prefixText: "R\$ ",
             validator: (value) =>
                 FormValidators.positiveNumber(value, label: 'Custo unitário'),
@@ -953,15 +1008,11 @@ class _OperationItemDraft {
 
   bool get isValid =>
       productId != null &&
-      double.tryParse(quantitySentController.text.replaceAll(',', '.')) !=
-          null &&
-      double.tryParse(unitCostController.text.replaceAll(',', '.')) != null;
+      parseDecimalInput(quantitySentController.text) != null &&
+      parseDecimalInput(unitCostController.text) != null;
 
-  double get sentValue =>
-      double.tryParse(
-        quantitySentController.text.trim().replaceAll(',', '.'),
-      ) ??
-      0;
+  double get sentValue => parseDecimalInput(quantitySentController.text) ?? 0;
+
   String? validateSent(String? value, {double? available}) {
     final base = FormValidators.positiveNumber(value, label: 'Quantidade');
     if (base != null) {
@@ -972,8 +1023,7 @@ class _OperationItemDraft {
       return null;
     }
 
-    final sent =
-        double.tryParse((value ?? '').trim().replaceAll(',', '.')) ?? 0;
+    final sent = parseDecimalInput(value) ?? 0;
     if (!hasSufficientStock(quantitySent: sent, available: available)) {
       return 'Quantidade maior que saldo disponível.';
     }
@@ -981,12 +1031,8 @@ class _OperationItemDraft {
   }
 
   CreateFieldOperationItemInput toInput() {
-    final quantitySent = double.parse(
-      quantitySentController.text.trim().replaceAll(',', '.'),
-    );
-    final unitCost = double.parse(
-      unitCostController.text.trim().replaceAll(',', '.'),
-    );
+    final quantitySent = parseDecimalInput(quantitySentController.text)!;
+    final unitCost = parseDecimalInput(unitCostController.text)!;
 
     return CreateFieldOperationItemInput(
       productId: productId!,
@@ -1216,14 +1262,16 @@ class _FinalizeItemCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Enviado: ${draft.quantitySent}',
+            'Enviado: ${formatDecimalInput(draft.quantitySent)}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpacing.md),
           AppTextField(
             controller: draft.returnedController,
             label: 'Quantidade devolvida',
+            hintText: 'Ex.: 1,50',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: const [DecimalTextInputFormatter()],
             validator: draft.validateReturned,
           ),
           const SizedBox(height: AppSpacing.md),
@@ -1248,7 +1296,9 @@ class _FinalizeItemDraft {
     required double quantityReturned,
     required String? notes,
   }) : returnedController = TextEditingController(
-         text: quantityReturned == 0 ? '' : quantityReturned.toString(),
+         text: quantityReturned == 0
+             ? ''
+             : formatDecimalInput(quantityReturned),
        ),
        notesController = TextEditingController(text: notes ?? '');
 
@@ -1270,15 +1320,14 @@ class _FinalizeItemDraft {
   final TextEditingController returnedController;
   final TextEditingController notesController;
 
-  double get parsedReturned =>
-      double.tryParse(returnedController.text.trim().replaceAll(',', '.')) ?? 0;
+  double get parsedReturned => parseDecimalInput(returnedController.text) ?? 0;
 
   String? validateReturned(String? value) {
     if (value == null || value.trim().isEmpty) {
       return null;
     }
 
-    final parsed = double.tryParse(value.trim().replaceAll(',', '.'));
+    final parsed = parseDecimalInput(value);
     if (parsed == null || parsed < 0) {
       return 'Informe um número válido.';
     }

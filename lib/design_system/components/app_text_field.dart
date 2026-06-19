@@ -1,5 +1,6 @@
 import 'package:field_management_app/design_system/foundations/app_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppTextField extends StatefulWidget {
   const AppTextField({
@@ -15,6 +16,7 @@ class AppTextField extends StatefulWidget {
     this.prefixText,
     this.onChanged,
     this.errorText,
+    this.inputFormatters,
   });
 
   final String label;
@@ -28,6 +30,7 @@ class AppTextField extends StatefulWidget {
   final String? prefixText;
   final ValueChanged<String>? onChanged;
   final String? errorText;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -68,6 +71,7 @@ class _AppTextFieldState extends State<AppTextField> {
           focusNode: _focusNode,
           controller: widget.controller,
           keyboardType: widget.keyboardType,
+          inputFormatters: widget.inputFormatters,
           obscureText: widget.obscureText,
           maxLines: widget.maxLines,
           validator: widget.validator,

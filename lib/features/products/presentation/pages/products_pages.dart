@@ -1,5 +1,6 @@
 import 'package:field_management_app/core/auth/admin_access.dart';
 import 'package:field_management_app/core/utils/async_value_ui.dart';
+import 'package:field_management_app/core/utils/decimal_input.dart';
 import 'package:field_management_app/core/utils/validators.dart';
 import 'package:field_management_app/design_system/components/app_action_button.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
@@ -427,11 +428,9 @@ class _CreateProductPageState extends ConsumerState<CreateProductPage> {
         return null;
       }
 
-      final quantity = double.tryParse(
-        draft.quantityController.text.trim().replaceAll(',', '.'),
-      );
-      final averageUnitCost = double.tryParse(
-        draft.averageUnitCostController.text.trim().replaceAll(',', '.'),
+      final quantity = parseDecimalInput(draft.quantityController.text);
+      final averageUnitCost = parseDecimalInput(
+        draft.averageUnitCostController.text,
       );
 
       if (quantity == null || quantity < 0) {
@@ -770,11 +769,9 @@ class _EditProductPageState extends ConsumerState<EditProductPage> {
         return null;
       }
 
-      final quantity = double.tryParse(
-        draft.quantityController.text.trim().replaceAll(',', '.'),
-      );
-      final averageUnitCost = double.tryParse(
-        draft.averageUnitCostController.text.trim().replaceAll(',', '.'),
+      final quantity = parseDecimalInput(draft.quantityController.text);
+      final averageUnitCost = parseDecimalInput(
+        draft.averageUnitCostController.text,
       );
 
       if (quantity == null || quantity < 0) {

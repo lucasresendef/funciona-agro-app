@@ -57,12 +57,14 @@ class InventoryRepositoryImpl implements InventoryRepository {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   }) async {
     final items = await _remoteDataSource.listBalances(
       farmId: farmId,
       inventoryLocationId: inventoryLocationId,
       productId: productId,
+      search: search,
       active: active,
     );
 
@@ -76,6 +78,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   }) async {
     final result = await _remoteDataSource.listBalancesPage(
@@ -84,6 +87,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
       farmId: farmId,
       inventoryLocationId: inventoryLocationId,
       productId: productId,
+      search: search,
       active: active,
     );
 

@@ -64,11 +64,13 @@ class GetInventoryBalancesUseCase {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   }) => _repository.listBalances(
     farmId: farmId,
     inventoryLocationId: inventoryLocationId,
     productId: productId,
+    search: search,
     active: active,
   );
 
@@ -78,6 +80,7 @@ class GetInventoryBalancesUseCase {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   }) => _repository.listBalancesPage(
     page: page,
@@ -85,6 +88,7 @@ class GetInventoryBalancesUseCase {
     farmId: farmId,
     inventoryLocationId: inventoryLocationId,
     productId: productId,
+    search: search,
     active: active,
   );
 }

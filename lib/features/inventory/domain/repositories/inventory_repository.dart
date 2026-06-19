@@ -25,6 +25,7 @@ abstract interface class InventoryRepository {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   });
   Future<PaginatedResult<InventoryBalance>> listBalancesPage({
@@ -33,6 +34,7 @@ abstract interface class InventoryRepository {
     String? farmId,
     String? inventoryLocationId,
     String? productId,
+    String? search,
     bool? active,
   });
 

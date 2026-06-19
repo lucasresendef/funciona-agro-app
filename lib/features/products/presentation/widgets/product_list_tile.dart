@@ -1,3 +1,4 @@
+import 'package:field_management_app/core/utils/decimal_input.dart';
 import 'package:field_management_app/core/utils/formatters.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_detail_dialog.dart';
@@ -23,8 +24,13 @@ class ProductListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       child: ListTile(
-        onTap: () =>
-            showProductDetailsSheet(context, product, canManage, onEdit, onDelete),
+        onTap: () => showProductDetailsSheet(
+          context,
+          product,
+          canManage,
+          onEdit,
+          onDelete,
+        ),
         contentPadding: EdgeInsets.zero,
         leading: const CircleAvatar(child: Icon(Icons.inventory_2_outlined)),
         title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -40,7 +46,7 @@ class ProductListTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             Text(
-              'Estoque total: ${product.totalStockQuantity.toStringAsFixed(2)}',
+              'Estoque total: ${formatDecimalInput(product.totalStockQuantity)}',
             ),
           ],
         ),
@@ -77,7 +83,7 @@ void showProductDetailsSheet(
             Chip(label: Text('Categoria: ${product.category}')),
             Chip(
               label: Text(
-                'Estoque total: ${product.totalStockQuantity.toStringAsFixed(2)}',
+                'Estoque total: ${formatDecimalInput(product.totalStockQuantity)}',
               ),
             ),
           ],
@@ -113,7 +119,7 @@ void showProductDetailsSheet(
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    Text('Qtd: ${stock.quantity.toStringAsFixed(2)}'),
+                    Text('Qtd: ${formatDecimalInput(stock.quantity)}'),
                     Text(
                       'Custo médio: ${AppFormatters.currency(stock.averageUnitCost)}',
                     ),

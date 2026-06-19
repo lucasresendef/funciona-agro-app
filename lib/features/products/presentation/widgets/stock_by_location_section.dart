@@ -1,3 +1,4 @@
+import 'package:field_management_app/core/utils/decimal_input.dart';
 import 'package:field_management_app/core/utils/validators.dart';
 import 'package:field_management_app/design_system/components/app_card.dart';
 import 'package:field_management_app/design_system/components/app_destructive.dart';
@@ -32,11 +33,7 @@ class StockByLocationSection extends ConsumerWidget {
     final totalQuantity = drafts.fold<double>(
       0,
       (sum, item) =>
-          sum +
-          (double.tryParse(
-                item.quantityController.text.trim().replaceAll(',', '.'),
-              ) ??
-              0),
+          sum + (parseDecimalInput(item.quantityController.text) ?? 0),
     );
 
     return AppCard(
@@ -68,7 +65,7 @@ class StockByLocationSection extends ConsumerWidget {
               Expanded(
                 child: _StockSummaryCard(
                   label: 'Qtd. total',
-                  value: totalQuantity.toStringAsFixed(2),
+                  value: formatDecimalInput(totalQuantity),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -171,9 +168,11 @@ class StockByLocationSection extends ConsumerWidget {
                       AppTextField(
                         controller: draft.quantityController,
                         label: 'Quantidade',
+                        hintText: 'Ex.: 120,50',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: const [DecimalTextInputFormatter()],
                         validator: (value) => FormValidators.nonNegativeNumber(
                           value,
                           label: 'Quantidade',
@@ -184,10 +183,12 @@ class StockByLocationSection extends ConsumerWidget {
                       AppTextField(
                         controller: draft.averageUnitCostController,
                         label: 'Custo médio unitário',
+                        hintText: 'Ex.: 69,89',
                         prefixText: 'R\$ ',
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
+                        inputFormatters: const [DecimalTextInputFormatter()],
                         validator: (value) => FormValidators.nonNegativeNumber(
                           value,
                           label: 'Custo médio unitário',
@@ -220,10 +221,12 @@ class StockLocationDraft {
     double? averageUnitCost,
     String? notes,
   }) : quantityController = TextEditingController(
-         text: quantity == null ? '' : quantity.toString(),
+         text: quantity == null ? '' : formatDecimalInput(quantity),
        ),
        averageUnitCostController = TextEditingController(
-         text: averageUnitCost == null ? '' : averageUnitCost.toString(),
+         text: averageUnitCost == null
+             ? ''
+             : formatDecimalInput(averageUnitCost),
        ),
        notesController = TextEditingController(text: notes ?? '');
 
